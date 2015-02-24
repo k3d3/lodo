@@ -40,7 +40,7 @@ object LodoBuild extends Build {
       testFrameworks += new TestFramework("utest.runner.Framework"),
       localUrl := ("localhost", 5001),
       refreshBrowsers <<= refreshBrowsers.triggeredBy(fastOptJS in Compile),
-      bootSnippet := "Lodo().main();"
+      bootSnippet := "Main().main();"
     )
 		.jvmSettings(Revolver.settings: _*)
 		.jvmSettings(
