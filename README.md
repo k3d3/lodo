@@ -10,6 +10,3 @@ add and move lists and items around the tree.
 Items and lists are the same thing - an item is merely an empty list. In fact, everything is a list,
 including notebooks and pages. This allows you to start a deep list somewhere, and if needed, move it
 into its own notebook or page without any modifications.
-
-This repository is built on top of the autowire branch from
-[Haoyi Li's workbench example app](https://github.com/lihaoyi/workbench-example-app).
