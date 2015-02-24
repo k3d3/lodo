@@ -1,0 +1,5 @@
+package lodo
+
+trait LodoApi {
+
+}
