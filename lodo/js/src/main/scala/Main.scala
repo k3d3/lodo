@@ -16,6 +16,8 @@ object Main extends JSApp {
     val baseUrl = BaseUrl(dom.window.location.href.takeWhile(_ != '#'))
     val router = MainRouter.router(baseUrl)
 
+    println(baseUrl)
+
     React.render(router(), dom.document.body)
   }
 }

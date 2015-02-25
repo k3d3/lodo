@@ -16,19 +16,6 @@ object MainRouter extends RoutingRules {
 
   override protected val notFound = redirect(dashboardLoc, Redirect.Replace)
 
-  override protected def interceptRender(ic: InterceptionR) = {
-    <.div(
-      <.nav(^.className := "navbar navbar-inverse navbar-fixed-top",
-        <.div(^.className := "container",
-          <.div(^.className := "navbar-header",
-            <.span(^.className := "navbar-brand", "SPA Tutorial")
-          ),
-          <.div(^.className := "collapse navbar-collapse",
-            "Hello"
-          )
-        )
-      ),
-      <.div(^.className := "container", ic.element)
-    )
-  }
+  // For now, do nothing with the intercept
+  override protected def interceptRender(ic: InterceptionR) = ic.element
 }

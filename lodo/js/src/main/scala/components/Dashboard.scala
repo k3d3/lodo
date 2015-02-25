@@ -8,8 +8,15 @@ object Dashboard {
     .render(router => {
       val appLinks = MainRouter.appLinks(router)
       <.div(
-        <.h2("hello"),
-        "This is cake."
+        <.nav(^.className := "navbar navbar-default navbar-fixed-top",
+          <.div(^.className := "container-fluid",
+            <.div(^.className := "navbar-header",
+              <.span(^.className := "navbar-brand", "Lodo")
+            ),
+            <.div(^.className := "collapse navbar-collapse")
+          )
+        ),
+        <.div(^.className := "container")
       )
     }).build
 }
