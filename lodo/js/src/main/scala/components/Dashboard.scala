@@ -1,22 +1,36 @@
 package lodo
 
-import japgolly.scalajs.react.ReactComponentB
+import java.util.UUID
+
+import japgolly.scalajs.react.extra.OnUnmount
+import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 import japgolly.scalajs.react.vdom.prefix_<^._
 
+import Helper._
+
 object Dashboard {
-  val component = ReactComponentB[MainRouter.Router]("Dashboard")
-    .render(router => {
+  case class State(items: Seq[Item] = items, selectedNotebook: Option[UUID] = None)
+
+  class Backend(t: BackendScope[MainRouter.Router, State]) extends OnUnmount {
+    def selectItem(item: Item) = {
+      t.modState(s => s.copy(selectedNotebook = Some(item.id)))
+    }
+  }
+
+  val items: Seq[Item] = Seq(
+    Item(UUID.randomUUID, None, 0, "Test"),
+    Item(UUID.randomUUID, None, 1, "Blah")
+  )
+
+  val dashboard = ReactComponentB[MainRouter.Router]("Dashboard")
+    .initialState(State(selectedNotebook = items.headOption.map(_.id)))
+    .backend(new Backend(_))
+    .render((router, S, B) => {
       val appLinks = MainRouter.appLinks(router)
       <.div(
-        <.nav(^.className := "navbar navbar-default navbar-fixed-top",
-          <.div(^.className := "container-fluid",
-            <.div(^.className := "navbar-header",
-              <.span(^.className := "navbar-brand", "Lodo")
-            ),
-            <.div(^.className := "collapse navbar-collapse")
-          )
-        ),
-        <.div(^.className := "container")
+        Header(),
+        Sidebar(Sidebar.Props(items, B.selectItem, S.selectedNotebook)),
+        Contents(Contents.Props(S.selectedNotebook))
       )
     }).build
 }

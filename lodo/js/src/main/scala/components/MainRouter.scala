@@ -8,7 +8,7 @@ trait AppLinks {
 }
 
 object MainRouter extends RoutingRules {
-  val dashboardLoc = register(rootLocation(Dashboard.component))
+  val dashboardLoc = register(rootLocation(Dashboard.dashboard))
 
   def appLinks(router: Router): AppLinks = new AppLinks {
     override def dashboard(content: TagMod*) = router.link(dashboardLoc)(content)
