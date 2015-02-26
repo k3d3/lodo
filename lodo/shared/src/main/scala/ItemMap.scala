@@ -5,8 +5,9 @@ import java.util.UUID
 // If parent is None, item is at root
 case class Item(id: UUID, parent: Option[UUID], row: Int, contents: String)
 
-case class ItemMap(items: Map[UUID, Item]) {
+case class ItemMap(items: Map[UUID, Item] = Map[UUID, Item]()) {
   def this(items: Seq[Item]) = this(items.map(i => i.id -> i).toMap)
+  def apply(id: Option[UUID]): Option[Item] = id.flatMap(items.lift)
 
   def apply(op: Op): ItemMap = op match {
     case AddOp(item) =>
@@ -20,6 +21,7 @@ case class ItemMap(items: Map[UUID, Item]) {
     case DuplicateOp(item, newId, newParent) =>
       ItemMap(items + (newId -> item.copy(id = newId, parent = newParent)))
   }
+
   def undo(op: Op): ItemMap = op match {
     case AddOp(item) =>
       ItemMap(items - item.id)
@@ -32,6 +34,20 @@ case class ItemMap(items: Map[UUID, Item]) {
     case DuplicateOp(_, newId, _) =>
       ItemMap(items - newId)
   }
+
+  lazy val notebooks =
+    items
+      .filter(_._2.parent == None)
+      .map(_._2)
+      .toSeq
+      .sortBy(_.row)
+
+  def children(itemId: UUID): Seq[Item] =
+    items
+      .filter(_._2.parent == Some(itemId))
+      .map(_._2)
+      .toSeq
+      .sortBy(_.row)
 }
 
 // We need to ensure there's enough information to reverse operations

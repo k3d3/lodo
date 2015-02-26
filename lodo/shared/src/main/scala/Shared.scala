@@ -15,8 +15,7 @@ object Helper {
     case Js.Str(s) => UUID.fromString(s)
   }
 
-  def makeTestUUID(index: Int) = UUID.fromString(f"00000000-0000-0000-0000-$index%012d")
-  final val testId = (0 until 10).map(makeTestUUID)
+  def testId(index: Int) = UUID.fromString(f"00000000-0000-0000-0000-$index%012d")
 }
 
 trait Api{

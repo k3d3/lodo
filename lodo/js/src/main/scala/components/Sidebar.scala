@@ -6,7 +6,7 @@ import japgolly.scalajs.react.ReactComponentB
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 object Sidebar {
-  case class Props(items: Seq[Item], selectNotebook: Item => Unit, selectedNotebook: Option[UUID] = None)
+  case class Props(items: Seq[Item], selectNotebook: Item => Unit, selectedNotebook: Option[Item] = None)
 
   val sidebar = ReactComponentB[Props]("Sidebar")
     .render(P => {
