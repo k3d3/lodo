@@ -6,14 +6,14 @@ import japgolly.scalajs.react.ReactComponentB
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 object Sidebar {
-  case class Props(items: Seq[Item], selectNotebook: Item => Unit, selectedNotebook: Option[Item] = None)
+  case class Props(b: Dashboard.Backend, itemMap: ItemMap, selectedNotebook: Option[UUID] = None)
 
   val sidebar = ReactComponentB[Props]("Sidebar")
-    .render(P => {
+    .render({ P =>
       <.div(^.cls := "container-fluid",
         <.div(^.cls := "row",
           <.div(^.cls := "col-sm-4 col-md-3 col-lg-2 sidebar",
-            NotebookSelector(NotebookSelector.Props(P.items, P.selectNotebook, P.selectedNotebook))
+            NotebookSelector(NotebookSelector.Props(P.b, P.itemMap, P.selectedNotebook))
           )
         )
       )

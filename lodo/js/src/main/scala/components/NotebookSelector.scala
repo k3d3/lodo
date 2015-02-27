@@ -2,29 +2,46 @@ package lodo
 
 import java.util.UUID
 
-import japgolly.scalajs.react.ReactComponentB
+import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 object NotebookSelector {
-  case class Props(notebooks: Seq[Item], selectItem: Item => Unit, selectedNotebook: Option[Item] = None)
+  case class Props(b: Dashboard.Backend, itemMap: ItemMap, selectedNotebook: Option[UUID] = None)
 
-  def renderItem(P: Props)(item: Item, index: Int) = {
-    <.li(^.key := item.id.toString,
-      (P.selectedNotebook == Some(item)) ?= (^.cls := "active"),
-      <.a(^.href := "#", ^.onClick --> P.selectItem(item),
-        <.span(^.cls := "sel-num", index),
-        <.span(^.cls := "content", item.contents)
-      ))
+  case class State(isEditing: Boolean = false, isAdding: Boolean = false)
+
+  class Backend(t: BackendScope[Props, State]) {
+    def onClickEdit(item: Item) = {
+      t.modState(s => s.copy(isEditing = !s.isEditing))
+    }
   }
 
-  def allItems(P: Props) = {
-    P.notebooks
-      .zipWithIndex
-      .map((renderItem(P) _).tupled)
+  def renderItem(P: Props, S: State, B: Backend)(item: Item, index: Int) = {
+    <.li(^.key := item.id.toString,
+      (P.selectedNotebook == Some(item)) ?= (^.cls := "active"),
+      <.a(^.href := "#", ^.onClick --> P.b.selectItem(item),
+        <.span(^.cls := "sel-num", index),
+        <.span(^.cls := "content", item.contents),
+        BtnGroup(
+          BtnGroup.Props(item, "page",
+            P.b.onClickComplete,
+            B.onClickEdit,
+            P.b.onNotebookClickAdd
+          )
+        )
+      )
+    )
   }
 
   val notebookSelector = ReactComponentB[Props]("NotebookSelector")
-    .render(P => <.ul(^.cls := "nav nav-sidebar", allItems(P)))
+    .initialState(State())
+    .backend(new Backend(_))
+    .render((P, S, B) => <.ul(^.cls := "nav nav-sidebar", P.itemMap.notebooks()
+      .zipWithIndex
+      .map { case (c, i) =>
+        Notebook(Notebook.Props(P.b, P.selectedNotebook, P.itemMap, c, i))
+      }
+    ))
     .build
 
   def apply(props: Props) = notebookSelector(props)
