@@ -16,23 +16,6 @@ object NotebookSelector {
     }
   }
 
-  def renderItem(P: Props, S: State, B: Backend)(item: Item, index: Int) = {
-    <.li(^.key := item.id.toString,
-      (P.selectedNotebook == Some(item)) ?= (^.cls := "active"),
-      <.a(^.href := "#", ^.onClick --> P.b.selectItem(item),
-        <.span(^.cls := "sel-num", index),
-        <.span(^.cls := "content", item.contents),
-        BtnGroup(
-          BtnGroup.Props(item, "page",
-            P.b.onClickComplete,
-            B.onClickEdit,
-            P.b.onNotebookClickAdd
-          )
-        )
-      )
-    )
-  }
-
   val notebookSelector = ReactComponentB[Props]("NotebookSelector")
     .initialState(State())
     .backend(new Backend(_))

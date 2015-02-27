@@ -34,7 +34,7 @@ object Notebook {
     def onSubmit(item: Item) =
       t.modState(s => {
         t._props.b.applyOperation(EditOp(item, s.editText))
-        s.copy(isEditing = !s.isEditing)
+        s.copy(isEditing = false)
       })
   }
 
@@ -56,7 +56,7 @@ object Notebook {
               P.item.contents
           ),
           BtnGroup(
-            BtnGroup.Props(P.item, "page",
+            BtnGroup.Props(P.item, "page", S.isEditing,
               P.b.onClickComplete,
               B.onClickEdit,
               P.b.onNotebookClickAdd

@@ -52,7 +52,7 @@ object LodoList {
               P.item.contents
           ),
           BtnGroup(
-            BtnGroup.Props(P.item, "item",
+            BtnGroup.Props(P.item, "item", S.isEditing,
               P.b.onClickComplete,
               B.onClickEdit,
               B.onClickAdd
