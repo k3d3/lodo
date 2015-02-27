@@ -22,6 +22,15 @@ object LodoList {
 
     def onEdit(e: ReactEventI) =
       t.modState(s => s.copy(editText = e.currentTarget.value))
+
+    def onFocus(e: ReactEventI) =
+      e.currentTarget.select()
+
+    def onSubmit(item: Item) =
+      t.modState(s => {
+        t._props.b.applyOperation(EditOp(item, s.editText))
+        s.copy(isEditing = !s.isEditing)
+      })
   }
 
   val list = ReactComponentB[Props]("List")
@@ -35,7 +44,10 @@ object LodoList {
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)
-              <.input(^.defaultValue := P.item.contents, ^.onChange ==> B.onEdit)
+              <.form(^.onSubmit --> B.onSubmit(P.item),
+                <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
+                  ^.defaultValue := P.item.contents, ^.onChange ==> B.onEdit)
+              )
             else
               P.item.contents
           ),

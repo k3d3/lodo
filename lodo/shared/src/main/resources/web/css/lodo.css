@@ -129,8 +129,19 @@ body {
     font-size: 9px;
 }
 
-.content > input {
+.content {
+    white-space: nowrap;
+}
+
+.content > form > input {
     color: #000;
+}
+
+.content > form {
+    margin: 0px;
+    padding: 0px;
+    width: 0px;
+    display: inline;
 }
 
 .selected {

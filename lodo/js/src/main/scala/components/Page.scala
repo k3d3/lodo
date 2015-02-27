@@ -22,6 +22,15 @@ object Page {
 
     def onEdit(e: ReactEventI) =
       t.modState(s => s.copy(editText = e.currentTarget.value))
+
+    def onFocus(e: ReactEventI) =
+      e.currentTarget.select()
+
+    def onSubmit(item: Item) =
+      t.modState(s => {
+        t._props.b.applyOperation(EditOp(item, s.editText))
+        s.copy(isEditing = !s.isEditing)
+      })
   }
 
   val page = ReactComponentB[Props]("Page")
@@ -37,7 +46,10 @@ object Page {
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)
-              <.input(^.value := P.item.contents)
+              <.form(^.onSubmit --> B.onSubmit(P.item),
+                <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
+                  ^.defaultValue := P.item.contents, ^.onChange ==> B.onEdit)
+              )
             else
               P.item.contents
           ),
@@ -52,11 +64,14 @@ object Page {
         children.nonEmpty ?= <.div(^.cls := "panel-body",
           children
             .zipWithIndex
-            .map { case (c, i) =>
+            .grouped((children.length+2-1)/2)
+            .map(i => {
               <.div(^.cls := "col-sm-6",
-                LodoList(LodoList.Props(P.b, P.itemMap, c, i))
+                i.map{ case (c, i) =>
+                  LodoList(LodoList.Props(P.b, P.itemMap, c, i))
+                }
               )
-            }
+            })
         )
       )
     }).build

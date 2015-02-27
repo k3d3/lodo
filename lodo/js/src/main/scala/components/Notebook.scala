@@ -28,9 +28,8 @@ object Notebook {
     def onEdit(e: ReactEventI) =
       t.modState(s => s.copy(editText = e.currentTarget.value))
 
-    def onFocus(e: ReactEventI) = {
+    def onFocus(e: ReactEventI) =
       e.currentTarget.select()
-    }
 
     def onSubmit(item: Item) =
       t.modState(s => {
