@@ -33,7 +33,7 @@ object Notebook {
 
     def onSubmit(item: Item) =
       t.modState(s => {
-        t._props.b.applyOperation(EditOp(item, s.editText))
+        t.props.b.applyOperation(EditOp(item, s.editText))
         s.copy(isEditing = false)
       })
   }
@@ -44,7 +44,7 @@ object Notebook {
     .render((P, S, B) => {
       <.li(^.key := P.item.id.toString,
         (P.selectedNotebook == Some(P.item.id)) ?= (^.cls := "active"),
-        <.a(^.href := "#", ^.onClick --> P.b.selectItem(P.item),
+        <.a(^.href := "#", ^.onClick --> P.b.selectNotebook(P.item),
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)

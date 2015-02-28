@@ -15,20 +15,44 @@ object Dashboard {
                    isAdding: Boolean = false)
 
   class Backend(t: BackendScope[MainRouter.Router, State]) extends OnUnmount {
-    def selectItem(item: Item) = {
+    def selectNotebook(item: Item) = {
       println("select")
       t.modState(s =>
         s.copy(selectedNotebook = Some(item.id),
           isAdding = if (s.selectedNotebook == Some(item.id)) s.isAdding else false))
     }
 
-    def onClickComplete(item: Item) =
-      applyOperation(itemMap => CompleteOp(item, itemMap.recursiveChildren(item.id)))
+    def onClickComplete(item: Item) = {
+      if (item.parent == None)
+        t.modState(s => {
+          val newItemMap = s.itemMap(CompleteOp(item, s.itemMap.recursiveChildren(item.id)))
+          s.copy(
+            selectedNotebook = newItemMap.notebooks().headOption.map(_.id),
+            itemMap = newItemMap)
+        })
+      else
+        applyOperation(itemMap => CompleteOp(item, itemMap.recursiveChildren(item.id)))
+    }
 
     def onNotebookClickAdd(item: Item) = {
       t.modState(s =>
-        s.copy(selectedNotebook = if (!s.isAdding) Some(item.id) else s.selectedNotebook,
+        s.copy(selectedNotebook = Some(item.id),
           isAdding = if (s.selectedNotebook == Some(item.id)) !s.isAdding else true))
+    }
+
+    def onAddComplete(op: AddOp) = {
+      t.modState(s => s.copy(
+        isAdding = false,
+        itemMap = s.itemMap(op)
+      ))
+    }
+
+    def onNotebookAddComplete(op: AddOp) = {
+      t.modState(s => s.copy(
+        isAdding = false,
+        itemMap = s.itemMap(op),
+        selectedNotebook = Some(op.item.id)
+      ))
     }
 
     def applyOperation(op: Op): Unit = applyOperation(_ => op)

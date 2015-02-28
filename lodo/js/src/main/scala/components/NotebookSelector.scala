@@ -27,7 +27,7 @@ object NotebookSelector {
 
     def onSubmit() =
       t.modState(s => {
-        t.props.b.applyOperation(AddOp(Item(UUID.randomUUID, None, time(), s.addText)))
+        t.props.b.onNotebookAddComplete(AddOp(Item(UUID.randomUUID, None, time(), s.addText)))
         s.copy(isNotebookAdding = false, addText = "")
       })
   }
