@@ -45,7 +45,7 @@ class ApiService(val system: ActorSystem) extends LodoApi {
   val opBus = new OpBus
 
   object State {
-    var items: ItemMap = new ItemMap(Seq(
+    var itemMap: ItemMap = new ItemMap(Seq(
       Item(testId(0), None, time(), "Notebook0"),
       Item(testId(1), None, time()+1, "Notebook1"),
       Item(testId(9), None, time()+2, "Notebook2"),
@@ -62,26 +62,46 @@ class ApiService(val system: ActorSystem) extends LodoApi {
       Item(UUID.randomUUID, Some(testId(2)), time()+10, "N1P2List5")
     ))
 
+    val stackLimit = 100
+    var undoStack: List[Op] = List()
+    var redoStack: List[Op] = List()
+
     var lastOps = LastOps(List(), 0)
   }
 
   override def getItems(user: String): (Seq[Item], Int) =
-    (State.items.items.map(_._2).toSeq, State.lastOps.lastIndex)
+    (State.itemMap.items.map(_._2).toSeq, State.lastOps.lastIndex)
 
   override def applyOperation(op: Op): Boolean = {
-    State.items = State.items(op)
-    State.lastOps = State.lastOps.addOp(op, OpApply)
-    println("apply")
+    State.itemMap = State.itemMap(op)
     opBus.publish(LastOp(op, OpApply))
-    println("after apply")
+    State.lastOps = State.lastOps.addOp(op, OpApply)
+    State.undoStack = (op :: State.undoStack).take(State.stackLimit)
+    State.redoStack = List()
     true
   }
 
-  override def undoOperation(op: Op): Boolean = {
-    State.items = State.items.undo(op)
-    State.lastOps = State.lastOps.addOp(op, OpUndo)
+  override def undo(): Boolean = {
+    if (State.undoStack.nonEmpty) {
+      println("undo")
+      State.itemMap = State.itemMap.undo(State.undoStack.head)
+      opBus.publish(LastOp(State.undoStack.head, OpUndo))
+      State.lastOps = State.lastOps.addOp(State.undoStack.head, OpUndo)
+      State.redoStack = (State.undoStack.head :: State.redoStack).take(State.stackLimit)
+      State.undoStack = State.undoStack.tail
+    }
+    true
+  }
 
-    opBus.publish(LastOp(op, OpUndo))
+  override def redo(): Boolean = {
+    if (State.redoStack.nonEmpty) {
+      println("redo")
+      State.itemMap = State.itemMap(State.redoStack.head)
+      opBus.publish(LastOp(State.redoStack.head, OpApply))
+      State.lastOps = State.lastOps.addOp(State.redoStack.head, OpApply)
+      State.undoStack = (State.redoStack.head :: State.undoStack).take(State.stackLimit)
+      State.redoStack = State.redoStack.tail
+    }
     true
   }
 

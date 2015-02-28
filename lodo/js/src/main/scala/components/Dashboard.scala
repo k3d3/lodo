@@ -5,7 +5,7 @@ import java.util.UUID
 import japgolly.scalajs.react.extra.OnUnmount
 import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 import japgolly.scalajs.react.vdom.prefix_<^._
-import org.scalajs.dom._
+import org.scalajs.dom
 
 import autowire._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -18,8 +18,6 @@ object Dashboard {
                    selectedNotebook: Option[UUID] = None,
                    isAdding: Boolean = false,
                    isSidebarShown: Boolean = false,
-                   undoStack: List[Op] = List(),
-                   redoStack: List[Op] = List(),
                    lastOp: Int = 0)
 
   class Backend(t: BackendScope[MainRouter.Router, State]) extends OnUnmount {
@@ -32,12 +30,14 @@ object Dashboard {
           selectedNotebook = itemMap.notebooks().headOption.map(_.id),
           lastOp = lastOp)
         )
-        org.scalajs.dom.setTimeout(() => checkForUpdates(), 0)
+        updateHandle.foreach(dom.clearTimeout)
+        updateHandle = Some(org.scalajs.dom.setTimeout(() => checkForUpdates(), 0))
       }
     }
 
     onInit()
 
+    var updateHandle: Option[Int] = None
     def checkForUpdates(): Unit = {
       println("checking for update")
       val call = Client[LodoApi].getChanges(t.state.lastOp).call()
@@ -60,9 +60,13 @@ object Dashboard {
               })
         }
 
-        org.scalajs.dom.setTimeout(() => checkForUpdates(), 0)
+        updateHandle.foreach(dom.clearTimeout)
+        updateHandle = Some(dom.setTimeout(() => checkForUpdates(), 0))
       })
-      call.onFailure({ case _ => org.scalajs.dom.setTimeout(() => checkForUpdates(), 1000)})
+      call.onFailure({ case _ => {
+        updateHandle.foreach(dom.clearTimeout)
+        updateHandle = Some(dom.setTimeout(() => checkForUpdates(), 1000))
+      }})
     }
 
     def selectNotebook(item: Item) = {
@@ -76,34 +80,11 @@ object Dashboard {
     }
 
     def performUndo() = {
-      t.modState(s =>
-        if (s.undoStack.isEmpty)
-          s
-        else {
-          Client[LodoApi].undoOperation(s.undoStack.head).call()
-          s.copy(
-            undoStack = s.undoStack.tail,
-            redoStack = s.undoStack.head :: s.redoStack,
-            itemMap = s.itemMap.undo(s.undoStack.head)
-          )
-        }
-
-      )
+      Client[LodoApi].undo().call()
     }
 
     def performRedo() = {
-      t.modState(s =>
-        if (s.redoStack.isEmpty)
-          s
-        else {
-          Client[LodoApi].applyOperation(s.redoStack.head).call()
-          s.copy(
-            undoStack = s.redoStack.head :: s.undoStack,
-            redoStack = s.redoStack.tail,
-            itemMap = s.itemMap(s.redoStack.head)
-          )
-        }
-      )
+      Client[LodoApi].redo().call()
     }
 
     def onClickComplete(item: Item) = {
@@ -114,9 +95,8 @@ object Dashboard {
           val newItemMap = s.itemMap(op)
           s.copy(
             selectedNotebook = newItemMap.notebooks().headOption.map(_.id),
-            itemMap = newItemMap,
-            undoStack = op :: s.undoStack,
-            redoStack = List.empty)
+            itemMap = newItemMap
+          )
         })
       else
         applyOperation(itemMap => CompleteOp(item, itemMap.recursiveChildren(item.id)))
@@ -132,9 +112,7 @@ object Dashboard {
       Client[LodoApi].applyOperation(op).call()
       t.modState(s => s.copy(
         isAdding = false,
-        itemMap = s.itemMap(op),
-        undoStack = op :: s.undoStack,
-        redoStack = List.empty
+        itemMap = s.itemMap(op)
       ))
     }
 
@@ -143,8 +121,6 @@ object Dashboard {
       t.modState(s => s.copy(
         isAdding = false,
         itemMap = s.itemMap(op),
-        undoStack = op :: s.undoStack,
-        redoStack = List.empty,
         selectedNotebook = Some(op.item.id)
       ))
     }
@@ -155,9 +131,7 @@ object Dashboard {
       t.modState(s => {
         val op = opBuild(s.itemMap)
         Client[LodoApi].applyOperation(op).call()
-        s.copy(itemMap = s.itemMap(op),
-          undoStack = op :: s.undoStack,
-          redoStack = List.empty)
+        s.copy(itemMap = s.itemMap(op))
       })
     }
   }
