@@ -37,22 +37,22 @@ case class ItemMap(items: Map[UUID, Item] = Map[UUID, Item]()) {
 
   def notebooks(): Seq[Item] =
     items
-      .filter(_._2.parent == None)
-      .map(_._2)
+      .filter{ case (_, item) => item.parent == None }
+      .map{ case (_, item) => item }
       .toSeq
       .sortBy(_.timestamp)
 
   def children(itemId: UUID): Seq[Item] =
     items
-      .filter(_._2.parent == Some(itemId))
-      .map(_._2)
+      .filter{ case (_, item) => item.parent == Some(itemId) }
+      .map{ case (_, item) => item }
       .toSeq
       .sortBy(_.timestamp)
 
   def recursiveChildren(itemId: UUID): Seq[Item] = {
     val childItems = items
-      .filter(_._2.parent == Some(itemId))
-      .map(_._2)
+      .filter{ case (_, item) => item.parent == Some(itemId) }
+      .map{ case (_, item) => item }
 
     childItems
       .flatMap(i => recursiveChildren(i.id))
@@ -69,7 +69,7 @@ case class MoveOp(item: Item, newParent: Option[UUID]) extends Op
 case class DuplicateOp(item: Item, newId: UUID, newParent: Option[UUID]) extends Op
 
 sealed trait OpType
-object OpApply extends OpType
-object OpUndo extends OpType
+case object OpApply extends OpType
+case object OpUndo extends OpType
 
 case class LastOp(op: Op, opType: OpType)

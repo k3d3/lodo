@@ -70,7 +70,7 @@ class ApiService(val system: ActorSystem) extends LodoApi {
   }
 
   override def getItems(user: String): (Seq[Item], Int) =
-    (State.itemMap.items.map(_._2).toSeq, State.lastOps.lastIndex)
+    (State.itemMap.items.map{ case (_, item) => item }.toSeq, State.lastOps.lastIndex)
 
   override def applyOperation(op: Op): Boolean = {
     State.itemMap = State.itemMap(op)
