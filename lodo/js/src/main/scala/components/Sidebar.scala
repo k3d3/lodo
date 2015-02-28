@@ -15,7 +15,7 @@ object Sidebar {
     .render({ P =>
       <.div(^.cls := "container-fluid",
         <.div(^.cls := "row",
-          <.div(^.classSet1("col-sm-4 col-md-3 col-lg-2 sidebar", ("sidebar-shown", P.isSidebarShown)),
+          <.div(^.classSet1("col-sm-4 col-md-3 sidebar", ("sidebar-shown", P.isSidebarShown)),
             NotebookSelector(NotebookSelector.Props(P.b, P.itemMap, P.selectedNotebook, P.isAdding))
           )
         )

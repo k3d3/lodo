@@ -32,7 +32,7 @@ object Contents {
     .backend(new Backend(_))
     .render((P, S, B) => {
       <.div(^.id := "lodo-contents",
-        ^.cls := "col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 col-lg-10 col-lg-offset-2 main",
+        ^.cls := "col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main",
         P.selectedNotebook.map(n =>
           P.itemMap
             .children(n)

@@ -11,8 +11,6 @@ import scala.scalajs.js.annotation.JSExport
 object Main extends JSApp {
   @JSExport
   def main(): Unit = {
-    dom.console.log("Hello")
-
     val baseUrl = BaseUrl(dom.window.location.href.takeWhile(_ != '#'))
     val router = MainRouter.router(baseUrl)
 

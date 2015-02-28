@@ -52,7 +52,14 @@ object Dashboard {
                     case LastOp(op, OpApply) => m(i.op)
                     case LastOp(op, OpUndo) => m.undo(i.op)
                   })
-                s.copy(itemMap = itemMap, lastOp = s.lastOp + changes.length)
+                s.copy(itemMap = itemMap,
+                  lastOp = s.lastOp + changes.length,
+                  selectedNotebook =
+                    if (s.selectedNotebook == None)
+                      itemMap.notebooks().headOption.map(_.id)
+                    else
+                      s.selectedNotebook
+                )
               })
         }
 
