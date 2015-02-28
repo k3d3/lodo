@@ -25,11 +25,14 @@ object NotebookSelector {
     def onEdit(e: ReactEventI) =
       t.modState(s => s.copy(addText = e.currentTarget.value))
 
-    def onSubmit() =
+    def onSubmit(e: ReactEvent) = {
+      e.preventDefault()
       t.modState(s => {
         t.props.b.onNotebookAddComplete(AddOp(Item(UUID.randomUUID, None, time(), s.addText)))
         s.copy(isNotebookAdding = false, addText = "")
       })
+    }
+
   }
 
   val notebookSelector = ReactComponentB[Props]("NotebookSelector")
@@ -45,7 +48,7 @@ object NotebookSelector {
         if (S.isNotebookAdding)
           <.li(
             <.a(^.href := "#",
-              <.form(^.onSubmit --> B.onSubmit(),
+              <.form(^.onSubmit ==> B.onSubmit,
                 <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
                   ^.onChange ==> B.onEdit)
               )

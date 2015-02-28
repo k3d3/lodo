@@ -31,11 +31,13 @@ object Notebook {
     def onFocus(e: ReactEventI) =
       e.currentTarget.select()
 
-    def onSubmit(item: Item) =
+    def onSubmit(item: Item)(e: ReactEvent) = {
+      e.preventDefault()
       t.modState(s => {
         t.props.b.applyOperation(EditOp(item, s.editText))
         s.copy(isEditing = false)
       })
+    }
   }
 
   val notebook = ReactComponentB[Props]("Notebook")
@@ -48,7 +50,7 @@ object Notebook {
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)
-              <.form(^.onSubmit --> B.onSubmit(P.item),
+              <.form(^.onSubmit ==> B.onSubmit(P.item),
                 <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
                   ^.defaultValue := P.item.contents, ^.onChange ==> B.onEdit)
               )

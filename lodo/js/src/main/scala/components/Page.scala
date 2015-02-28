@@ -32,17 +32,21 @@ object Page {
     def onFocus(e: ReactEventI) =
       e.currentTarget.select()
 
-    def onEditSubmit(item: Item) =
+    def onEditSubmit(item: Item)(e: ReactEvent) = {
+      e.preventDefault()
       t.modState(s => {
         t._props.b.applyOperation(EditOp(item, s.editText))
         s.copy(isEditing = false)
       })
+    }
 
-    def onAddSubmit() =
+    def onAddSubmit(e: ReactEvent) = {
+      e.preventDefault()
       t.modState(s => {
         t.props.b.applyOperation(AddOp(Item(UUID.randomUUID, Some(t.props.item.id), time(), s.addText)))
         s.copy(isAdding = false, addText = "")
       })
+    }
   }
 
   val page = ReactComponentB[Props]("Page")
@@ -58,7 +62,7 @@ object Page {
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)
-              <.form(^.onSubmit --> B.onEditSubmit(P.item),
+              <.form(^.onSubmit ==> B.onEditSubmit(P.item),
                 <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
                   ^.defaultValue := P.item.contents, ^.onChange ==> B.onEditChange)
               )
@@ -87,7 +91,7 @@ object Page {
             }),
           S.isAdding ?= <.div(
             <.a(^.href := "#",
-              <.form(^.onSubmit --> B.onAddSubmit(),
+              <.form(^.onSubmit ==> B.onAddSubmit,
                 <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
                   ^.onChange ==> B.onAddChange)
               )

@@ -18,7 +18,8 @@ object Contents {
     def onAddChange(e: ReactEventI) =
       t.modState(s => s.copy(addText = e.currentTarget.value))
 
-    def onAddSubmit() = {
+    def onAddSubmit(e: ReactEvent) = {
+      e.preventDefault()
       t.modState(s => {
         t.props.b.onAddComplete(AddOp(Item(UUID.randomUUID, t.props.selectedNotebook, time(), s.addText)))
         s.copy(addText = "")
@@ -40,7 +41,7 @@ object Contents {
         ),
         P.isAdding ?= <.div(
           <.a(^.href := "#",
-            <.form(^.onSubmit --> B.onAddSubmit(),
+            <.form(^.onSubmit ==> B.onAddSubmit,
               <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
                 ^.onChange ==> B.onAddChange)
             )

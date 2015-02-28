@@ -12,23 +12,59 @@ object Dashboard {
 
   case class State(itemMap: ItemMap = items,
                    selectedNotebook: Option[UUID] = None,
-                   isAdding: Boolean = false)
+                   isAdding: Boolean = false,
+                   isSidebarShown: Boolean = false,
+                   undoStack: List[Op] = List(),
+                   redoStack: List[Op] = List())
 
   class Backend(t: BackendScope[MainRouter.Router, State]) extends OnUnmount {
     def selectNotebook(item: Item) = {
-      println("select")
       t.modState(s =>
         s.copy(selectedNotebook = Some(item.id),
           isAdding = if (s.selectedNotebook == Some(item.id)) s.isAdding else false))
     }
 
+    def toggleShowSidebar() = {
+      println("toggle")
+      t.modState(s => s.copy(isSidebarShown = !s.isSidebarShown))
+    }
+
+    def performUndo() = {
+      t.modState(s =>
+        if (s.undoStack.isEmpty)
+          s
+        else
+          s.copy(
+            undoStack = s.undoStack.tail,
+            redoStack = s.undoStack.head :: s.redoStack,
+            itemMap = s.itemMap.undo(s.undoStack.head)
+          )
+      )
+    }
+
+    def performRedo() = {
+      t.modState(s =>
+        if (s.redoStack.isEmpty)
+          s
+        else
+          s.copy(
+            undoStack = s.redoStack.head :: s.undoStack,
+            redoStack = s.redoStack.tail,
+            itemMap = s.itemMap(s.redoStack.head)
+          )
+      )
+    }
+
     def onClickComplete(item: Item) = {
       if (item.parent == None)
         t.modState(s => {
-          val newItemMap = s.itemMap(CompleteOp(item, s.itemMap.recursiveChildren(item.id)))
+          val op = CompleteOp(item, s.itemMap.recursiveChildren(item.id))
+          val newItemMap = s.itemMap(op)
           s.copy(
             selectedNotebook = newItemMap.notebooks().headOption.map(_.id),
-            itemMap = newItemMap)
+            itemMap = newItemMap,
+            undoStack = op :: s.undoStack,
+            redoStack = List.empty)
         })
       else
         applyOperation(itemMap => CompleteOp(item, itemMap.recursiveChildren(item.id)))
@@ -43,7 +79,9 @@ object Dashboard {
     def onAddComplete(op: AddOp) = {
       t.modState(s => s.copy(
         isAdding = false,
-        itemMap = s.itemMap(op)
+        itemMap = s.itemMap(op),
+        undoStack = op :: s.undoStack,
+        redoStack = List.empty
       ))
     }
 
@@ -51,6 +89,8 @@ object Dashboard {
       t.modState(s => s.copy(
         isAdding = false,
         itemMap = s.itemMap(op),
+        undoStack = op :: s.undoStack,
+        redoStack = List.empty,
         selectedNotebook = Some(op.item.id)
       ))
     }
@@ -60,7 +100,9 @@ object Dashboard {
     def applyOperation(opBuild: ItemMap => Op) = {
       t.modState(s => {
         val op = opBuild(s.itemMap)
-        s.copy(itemMap = s.itemMap(op))
+        s.copy(itemMap = s.itemMap(op),
+          undoStack = op :: s.undoStack,
+          redoStack = List.empty)
       })
     }
   }
@@ -90,8 +132,8 @@ object Dashboard {
     .render((router, S, B) => {
       val appLinks = MainRouter.appLinks(router)
       <.div(
-        Header(),
-        Sidebar(Sidebar.Props(B, S.itemMap, S.selectedNotebook, S.isAdding)),
+        Header(Header.Props(B, S.undoStack.length, S.redoStack.length)),
+        Sidebar(Sidebar.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, S.isSidebarShown)),
         Contents(Contents.Props(B, S.itemMap, S.selectedNotebook, S.isAdding))
       )
     }).build

@@ -2,7 +2,7 @@ package lodo
 
 import java.util.UUID
 
-import japgolly.scalajs.react.{ReactEventI, BackendScope, ReactComponentB}
+import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import lodo.Helper._
 
@@ -32,17 +32,21 @@ object LodoList {
     def onFocus(e: ReactEventI) =
       e.currentTarget.select()
 
-    def onEditSubmit(item: Item) =
+    def onEditSubmit(item: Item)(e: ReactEvent) = {
+      e.preventDefault()
       t.modState(s => {
         t._props.b.applyOperation(EditOp(item, s.editText))
-        s.copy(isEditing = !s.isEditing)
+        s.copy(isEditing = false)
       })
+    }
 
-    def onAddSubmit() =
+    def onAddSubmit(e: ReactEvent) = {
+      e.preventDefault()
       t.modState(s => {
         t.props.b.applyOperation(AddOp(Item(UUID.randomUUID, Some(t.props.item.id), time(), s.addText)))
         s.copy(isAdding = false, addText = "")
       })
+    }
   }
 
   val list = ReactComponentB[Props]("List")
@@ -56,7 +60,7 @@ object LodoList {
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)
-              <.form(^.onSubmit --> B.onEditSubmit(P.item),
+              <.form(^.onSubmit ==> B.onEditSubmit(P.item),
                 <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
                   ^.defaultValue := P.item.contents, ^.onChange ==> B.onEditChange)
               )
@@ -80,7 +84,7 @@ object LodoList {
             },
           S.isAdding ?= <.div(
             <.a(^.href := "#",
-              <.form(^.onSubmit --> B.onAddSubmit(),
+              <.form(^.onSubmit ==> B.onAddSubmit,
                 <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
                   ^.onChange ==> B.onAddChange)
               )
