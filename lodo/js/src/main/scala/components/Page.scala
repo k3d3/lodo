@@ -54,24 +54,26 @@ object Page {
               P.item.contents
           ),
           BtnGroup(
-            BtnGroup.Props(P.item, "page", S.isEditing,
+            BtnGroup.Props(P.item, "page",
+              S.isEditing, S.isAdding,
               P.b.onClickComplete,
               B.onClickEdit,
               B.onClickAdd
             )
           )
         ),
-        children.nonEmpty ?= <.div(^.cls := "panel-body",
-          children
+        (children.nonEmpty || S.isAdding) ?= <.div(^.cls := "panel-body",
+          children.nonEmpty ?= children
             .zipWithIndex
             .grouped((children.length+2-1)/2)
-            .map(i => {
+            .map(iL => {
               <.div(^.cls := "col-sm-6",
-                i.map{ case (c, i) =>
+                iL.map{ case (c, i) =>
                   LodoList(LodoList.Props(P.b, P.itemMap, c, i))
                 }
               )
-            })
+            }),
+          S.isAdding ?= <.div("Hello")
         )
       )
     }).build

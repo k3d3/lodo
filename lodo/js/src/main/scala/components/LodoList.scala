@@ -39,7 +39,7 @@ object LodoList {
     .render((P, S, B) => {
       val children = P.itemMap.children(P.item.id)
       <.div(^.cls := "panel panel-default item",
-        <.div(^.cls := (if (children.isEmpty) "panel-body" else "panel-heading"),
+        <.div(^.cls := (if (children.nonEmpty || S.isAdding) "panel-heading" else "panel-body"),
           ^.draggable := true,
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
@@ -52,19 +52,21 @@ object LodoList {
               P.item.contents
           ),
           BtnGroup(
-            BtnGroup.Props(P.item, "item", S.isEditing,
+            BtnGroup.Props(P.item, "item",
+              S.isEditing, S.isAdding,
               P.b.onClickComplete,
               B.onClickEdit,
               B.onClickAdd
             )
           )
         ),
-        children.nonEmpty ?= <.div(^.cls := "panel-body",
-          children
+        (children.nonEmpty || S.isAdding) ?= <.div(^.cls := "panel-body",
+          children.nonEmpty ?= children
             .zipWithIndex
             .map { case (c, i) =>
               LodoList(LodoList.Props(P.b, P.itemMap, c, i))
-            }
+            },
+          S.isAdding ?= <.div("Hello")
         )
       )
     }).build

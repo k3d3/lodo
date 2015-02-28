@@ -2,15 +2,14 @@ package lodo
 
 import java.util.UUID
 
-import japgolly.scalajs.react.{Ref, ReactEventI, BackendScope, ReactComponentB}
+import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
-import org.scalajs.dom.raw.HTMLInputElement
 
 object Notebook {
   case class Props(b: Dashboard.Backend, selectedNotebook: Option[UUID],
-                   itemMap: ItemMap, item: Item, index: Int)
+                   isAdding: Boolean, itemMap: ItemMap, item: Item, index: Int)
 
-  case class State(isAdding: Boolean = false, isEditing: Boolean = false,
+  case class State(isEditing: Boolean = false,
                    addText: String = "", editText: String)
 
   class Backend(t: BackendScope[Props, State]) {
@@ -22,8 +21,9 @@ object Notebook {
       })
     }
 
-    def onClickAdd(item: Item) =
-      t.modState(s => s.copy(isAdding = !s.isAdding))
+    def onClickAdd(item: Item) = {
+      t.props.b.onNotebookClickAdd(item)
+    }
 
     def onEdit(e: ReactEventI) =
       t.modState(s => s.copy(editText = e.currentTarget.value))
@@ -56,10 +56,11 @@ object Notebook {
               P.item.contents
           ),
           BtnGroup(
-            BtnGroup.Props(P.item, "page", S.isEditing,
+            BtnGroup.Props(P.item, "page",
+              S.isEditing, if (P.selectedNotebook == Some(P.item.id)) P.isAdding else false,
               P.b.onClickComplete,
               B.onClickEdit,
-              P.b.onNotebookClickAdd
+              B.onClickAdd
             )
           )
         )

@@ -16,6 +16,7 @@ object Helper {
   }
 
   def testId(index: Int) = UUID.fromString(f"00000000-0000-0000-0000-$index%012d")
+  def time(): Int = (System.currentTimeMillis() / 1000).toInt
 }
 
 trait Api{

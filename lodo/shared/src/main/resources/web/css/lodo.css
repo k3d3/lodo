@@ -137,7 +137,7 @@ body {
     color: #000;
 }
 
-.content > form {
+.content form {
     margin: 0px;
     padding: 0px;
     width: 0px;

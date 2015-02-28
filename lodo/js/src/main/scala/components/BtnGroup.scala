@@ -1,8 +1,7 @@
 package lodo
 
-import japgolly.scalajs.react.{BackendScope, ReactEventH, ReactComponentB}
+import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
-import org.scalajs.dom.raw.HTMLButtonElement
 
 object BtnGroup {
   sealed trait BtnType
@@ -11,7 +10,8 @@ object BtnGroup {
   object BtnAdd extends BtnType
 
 
-  case class Props(item: Item, btnGroupType: String, isEditing: Boolean,
+  case class Props(item: Item, btnGroupType: String,
+                   isEditing: Boolean, isAdding: Boolean,
                    onClickComplete: Item => Unit,
                    onClickEdit: Item => Unit,
                    onClickAdd: Item => Unit)
@@ -20,7 +20,7 @@ object BtnGroup {
     val glyphClass = btnType match {
       case BtnComplete => "ok"
       case BtnEdit => if (P.isEditing) "edit" else "pencil"
-      case BtnAdd => "plus"
+      case BtnAdd => if (P.isAdding) "check" else "plus"
     }
     <.button(^.cls := "btn btn-sm btn-default", ^.title := title,
       <.span(^.cls := "glyphicon glyphicon-" + glyphClass),

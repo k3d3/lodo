@@ -3,7 +3,7 @@ package lodo
 import java.util.UUID
 
 // If parent is None, item is at root
-case class Item(id: UUID, parent: Option[UUID], row: Int, contents: String)
+case class Item(id: UUID, parent: Option[UUID], timestamp: Int, contents: String)
 
 case class ItemMap(items: Map[UUID, Item] = Map[UUID, Item]()) {
   def this(items: Seq[Item]) = this(items.map(i => i.id -> i).toMap)
@@ -40,14 +40,14 @@ case class ItemMap(items: Map[UUID, Item] = Map[UUID, Item]()) {
       .filter(_._2.parent == None)
       .map(_._2)
       .toSeq
-      .sortBy(_.row)
+      .sortBy(_.timestamp)
 
   def children(itemId: UUID): Seq[Item] =
     items
       .filter(_._2.parent == Some(itemId))
       .map(_._2)
       .toSeq
-      .sortBy(_.row)
+      .sortBy(_.timestamp)
 
   def recursiveChildren(itemId: UUID): Seq[Item] = {
     val childItems = items

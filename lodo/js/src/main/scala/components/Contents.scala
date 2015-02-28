@@ -6,7 +6,7 @@ import japgolly.scalajs.react.ReactComponentB
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 object Contents {
-  case class Props(b: Dashboard.Backend, itemMap: ItemMap, selectedNotebook: Option[UUID])
+  case class Props(b: Dashboard.Backend, itemMap: ItemMap, selectedNotebook: Option[UUID], isAdding: Boolean)
 
   val contents = ReactComponentB[Props]("Contents")
     .render({ P =>
@@ -18,7 +18,8 @@ object Contents {
             .children(n)
             .zipWithIndex
             .map{ case (p, i) => Page(Page.Props(P.b, P.itemMap, p, i)) }
-        )
+        ),
+        P.isAdding ?= <.div("Hello")
       )
     }).build
 
