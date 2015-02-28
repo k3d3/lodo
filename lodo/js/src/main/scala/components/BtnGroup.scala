@@ -18,7 +18,7 @@ object BtnGroup {
 
   def btn(P: Props, btnType: BtnType, title: String) = {
     val glyphClass = btnType match {
-      case BtnComplete => "ok"
+      case BtnComplete => "remove"
       case BtnEdit => if (P.isEditing) "edit" else "pencil"
       case BtnAdd => if (P.isAdding) "check" else "plus"
     }
