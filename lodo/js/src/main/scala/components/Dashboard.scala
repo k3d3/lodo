@@ -132,7 +132,7 @@ object Dashboard {
     .render((router, S, B) => {
       val appLinks = MainRouter.appLinks(router)
       <.div(
-        Header(Header.Props(B, S.undoStack.length, S.redoStack.length)),
+        Header(Header.Props(B)),
         Sidebar(Sidebar.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, S.isSidebarShown)),
         Contents(Contents.Props(B, S.itemMap, S.selectedNotebook, S.isAdding))
       )

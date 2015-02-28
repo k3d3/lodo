@@ -4,7 +4,7 @@ import japgolly.scalajs.react.ReactComponentB
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 object Header {
-  case class Props(b: Dashboard.Backend, undoStackSize: Int = 0, redoStackSize: Int = 0)
+  case class Props(b: Dashboard.Backend)
 
   val header = ReactComponentB[Props]("Header")
     .render(P => {
@@ -13,17 +13,11 @@ object Header {
           <.div(^.cls := "navbar-header",
             <.button(^.cls := "navbar-toggle collapsed", ^.tpe := "button",
               ^.onClick --> P.b.performRedo(),
-              <.span(^.cls := "glyphicon glyphicon-forward"), " ",
-              P.redoStackSize > 0 ?= <.span(^.cls := "label label-default",
-                P.redoStackSize.toString
-              )
+              <.span(^.cls := "glyphicon glyphicon-forward")
             ),
             <.button(^.cls := "navbar-toggle collapsed", ^.tpe := "button",
               ^.onClick --> P.b.performUndo(),
-              <.span(^.cls := "glyphicon glyphicon-backward"), " ",
-              P.undoStackSize > 0 ?= <.span(^.cls := "label label-default",
-                P.undoStackSize.toString
-              )
+              <.span(^.cls := "glyphicon glyphicon-backward")
             ),
             <.button(^.cls := "navbar-toggle collapsed", ^.tpe := "button",
               <.span(^.cls := "glyphicon glyphicon-search")
@@ -40,19 +34,9 @@ object Header {
           <.div(^.cls := "navbar-collapse collapse",
             <.ul(^.cls := "nav navbar-nav navbar-right",
               <.li(<.a(^.href := "#",
-                ^.onClick --> P.b.performUndo(),
-                "Undo ",
-                P.undoStackSize > 0 ?= <.span(^.cls := "label label-default",
-                  P.undoStackSize.toString
-                )
-              )),
+                ^.onClick --> P.b.performUndo(), "Undo")),
               <.li(<.a(^.href := "#",
-                ^.onClick --> P.b.performRedo(),
-                "Redo ",
-                P.redoStackSize > 0 ?= <.span(^.cls := "label label-default",
-                  P.redoStackSize.toString
-                )
-              ))
+                ^.onClick --> P.b.performRedo(), "Redo"))
             ),
           <.form(^.cls := "navbar-form navbar-right",
             <.input(^.cls := "form-control filter",
