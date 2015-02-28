@@ -21,7 +21,7 @@ object Dashboard {
                    redoStack: List[Op] = List())
 
   class Backend(t: BackendScope[MainRouter.Router, State]) extends OnUnmount {
-    AjaxClient[LodoApi].getItems("test").call().foreach { items: Seq[Item] =>
+    Client[LodoApi].getItems("mainUser").call().foreach { items: Seq[Item] =>
       val itemMap = new ItemMap(items)
       t.modState(s => s.copy(
         itemMap = itemMap,
@@ -35,7 +35,6 @@ object Dashboard {
     }
 
     def toggleShowSidebar() = {
-      println("toggle")
       t.modState(s => s.copy(isSidebarShown = !s.isSidebarShown))
     }
 
@@ -43,12 +42,15 @@ object Dashboard {
       t.modState(s =>
         if (s.undoStack.isEmpty)
           s
-        else
+        else {
+          Client[LodoApi].undoOperation(s.undoStack.head).call()
           s.copy(
             undoStack = s.undoStack.tail,
             redoStack = s.undoStack.head :: s.redoStack,
             itemMap = s.itemMap.undo(s.undoStack.head)
           )
+        }
+
       )
     }
 
@@ -56,12 +58,14 @@ object Dashboard {
       t.modState(s =>
         if (s.redoStack.isEmpty)
           s
-        else
+        else {
+          Client[LodoApi].applyOperation(s.redoStack.head).call()
           s.copy(
             undoStack = s.redoStack.head :: s.undoStack,
             redoStack = s.redoStack.tail,
             itemMap = s.itemMap(s.redoStack.head)
           )
+        }
       )
     }
 
@@ -69,6 +73,7 @@ object Dashboard {
       if (item.parent == None)
         t.modState(s => {
           val op = CompleteOp(item, s.itemMap.recursiveChildren(item.id))
+          Client[LodoApi].applyOperation(op).call()
           val newItemMap = s.itemMap(op)
           s.copy(
             selectedNotebook = newItemMap.notebooks().headOption.map(_.id),
@@ -87,6 +92,7 @@ object Dashboard {
     }
 
     def onAddComplete(op: AddOp) = {
+      Client[LodoApi].applyOperation(op).call()
       t.modState(s => s.copy(
         isAdding = false,
         itemMap = s.itemMap(op),
@@ -96,6 +102,7 @@ object Dashboard {
     }
 
     def onNotebookAddComplete(op: AddOp) = {
+      Client[LodoApi].applyOperation(op).call()
       t.modState(s => s.copy(
         isAdding = false,
         itemMap = s.itemMap(op),
@@ -110,6 +117,7 @@ object Dashboard {
     def applyOperation(opBuild: ItemMap => Op) = {
       t.modState(s => {
         val op = opBuild(s.itemMap)
+        Client[LodoApi].applyOperation(op).call()
         s.copy(itemMap = s.itemMap(op),
           undoStack = op :: s.undoStack,
           redoStack = List.empty)

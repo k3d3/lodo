@@ -24,13 +24,15 @@ class ApiService extends LodoApi {
     ))
   }
 
-  def getItems(user: String) = State.items.items.map(_._2).toSeq
+  override def getItems(user: String) = State.items.items.map(_._2).toSeq
 
-  def applyOperation(op: Op) = {
+  override def applyOperation(op: Op): Boolean = {
     State.items = State.items(op)
+    true
   }
 
-  def undoOperation(op: Op) = {
+  override def undoOperation(op: Op): Boolean = {
     State.items = State.items.undo(op)
+    true
   }
 }

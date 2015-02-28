@@ -6,7 +6,7 @@ import upickle._
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
-object AjaxClient extends autowire.Client[String, upickle.Reader, upickle.Writer] {
+object Client extends autowire.Client[String, upickle.Reader, upickle.Writer] {
   override def doCall(req: Request): Future[String] = {
     dom.ext.Ajax.post(
       url = "/api/" + req.path.mkString("/"),
