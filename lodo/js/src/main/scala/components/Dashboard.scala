@@ -5,6 +5,7 @@ import java.util.UUID
 import japgolly.scalajs.react.extra.OnUnmount
 import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 import japgolly.scalajs.react.vdom.prefix_<^._
+import org.scalajs.dom._
 
 import autowire._
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
@@ -18,14 +19,50 @@ object Dashboard {
                    isAdding: Boolean = false,
                    isSidebarShown: Boolean = false,
                    undoStack: List[Op] = List(),
-                   redoStack: List[Op] = List())
+                   redoStack: List[Op] = List(),
+                   lastOp: Int = 0)
 
   class Backend(t: BackendScope[MainRouter.Router, State]) extends OnUnmount {
-    Client[LodoApi].getItems("mainUser").call().foreach { items: Seq[Item] =>
-      val itemMap = new ItemMap(items)
-      t.modState(s => s.copy(
-        itemMap = itemMap,
-        selectedNotebook = itemMap.notebooks().headOption.map(_.id)))
+    def onInit(): Unit = {
+      Client[LodoApi].getItems("mainUser").call().foreach { case (items: Seq[Item], lastOp: Int) =>
+        println(s"lastOp: $lastOp")
+        val itemMap = new ItemMap(items)
+        t.modState(s => s.copy(
+          itemMap = itemMap,
+          selectedNotebook = itemMap.notebooks().headOption.map(_.id),
+          lastOp = lastOp)
+        )
+        org.scalajs.dom.setTimeout(() => checkForUpdates(), 0)
+      }
+    }
+
+    onInit()
+
+    def checkForUpdates(): Unit = {
+      println("checking for update")
+      val call = Client[LodoApi].getChanges(t.state.lastOp).call()
+      call.onSuccess({ case changeOption: Option[List[LastOp]] =>
+        println("update")
+        println(changeOption)
+
+        changeOption match {
+          case None =>
+            onInit()
+          case Some(changes) =>
+            if (changes.nonEmpty)
+              t.modState(s => {
+                val itemMap = changes.foldLeft(s.itemMap)((m, i) =>
+                  i match {
+                    case LastOp(op, OpApply) => m(i.op)
+                    case LastOp(op, OpUndo) => m.undo(i.op)
+                  })
+                s.copy(itemMap = itemMap, lastOp = s.lastOp + changes.length)
+              })
+        }
+
+        org.scalajs.dom.setTimeout(() => checkForUpdates(), 0)
+      })
+      call.onFailure({ case _ => org.scalajs.dom.setTimeout(() => checkForUpdates(), 1000)})
     }
 
     def selectNotebook(item: Item) = {

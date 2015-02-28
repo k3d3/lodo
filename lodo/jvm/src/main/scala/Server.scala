@@ -4,7 +4,8 @@ import akka.actor.ActorSystem
 import spray.routing.SimpleRoutingApp
 import upickle._
 
-import scala.util.Properties
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Properties}
 
 import Helper._
 
@@ -20,7 +21,7 @@ object Server extends SimpleRoutingApp {
 
     val port = Properties.envOrElse("PORT", "5000").toInt
 
-    val apiService = new ApiService
+    val apiService = new ApiService(system)
 
     startServer("0.0.0.0", port = port) {
       get {
@@ -32,10 +33,13 @@ object Server extends SimpleRoutingApp {
       post {
         path("api" / Segments) { s =>
           extract(_.request.entity.asString) { e =>
-            complete {
+            onComplete(Future {
               Router.route[LodoApi](apiService)(
                 autowire.Core.Request(s, upickle.read[Map[String, String]](e))
               )
+            }) {
+              case Success(value) => complete(value)
+              case Failure(f) => complete(s"failure! $f")
             }
           }
         }

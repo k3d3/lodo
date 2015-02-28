@@ -67,3 +67,9 @@ case class EditOp(item: Item, newContents: String) extends Op
 case class CompleteOp(item: Item, itemChildren: Seq[Item]) extends Op
 case class MoveOp(item: Item, newParent: Option[UUID]) extends Op
 case class DuplicateOp(item: Item, newId: UUID, newParent: Option[UUID]) extends Op
+
+sealed trait OpType
+object OpApply extends OpType
+object OpUndo extends OpType
+
+case class LastOp(op: Op, opType: OpType)
