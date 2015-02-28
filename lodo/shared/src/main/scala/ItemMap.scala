@@ -3,7 +3,7 @@ package lodo
 import java.util.UUID
 
 // If parent is None, item is at root
-case class Item(id: UUID, parent: Option[UUID], timestamp: Int, contents: String)
+case class Item(id: UUID, parent: Option[UUID], timestamp: Long, contents: String)
 
 case class ItemMap(items: Map[UUID, Item] = Map[UUID, Item]()) {
   def this(items: Seq[Item]) = this(items.map(i => i.id -> i).toMap)

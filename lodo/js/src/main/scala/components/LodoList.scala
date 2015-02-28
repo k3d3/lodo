@@ -1,7 +1,10 @@
 package lodo
 
+import java.util.UUID
+
 import japgolly.scalajs.react.{ReactEventI, BackendScope, ReactComponentB}
 import japgolly.scalajs.react.vdom.prefix_<^._
+import lodo.Helper._
 
 object LodoList {
   case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int)
@@ -20,16 +23,25 @@ object LodoList {
     def onClickAdd(item: Item) =
       t.modState(s => s.copy(isAdding = !s.isAdding))
 
-    def onEdit(e: ReactEventI) =
+    def onEditChange(e: ReactEventI) =
       t.modState(s => s.copy(editText = e.currentTarget.value))
+
+    def onAddChange(e: ReactEventI) =
+      t.modState(s => s.copy(addText = e.currentTarget.value))
 
     def onFocus(e: ReactEventI) =
       e.currentTarget.select()
 
-    def onSubmit(item: Item) =
+    def onEditSubmit(item: Item) =
       t.modState(s => {
         t._props.b.applyOperation(EditOp(item, s.editText))
         s.copy(isEditing = !s.isEditing)
+      })
+
+    def onAddSubmit() =
+      t.modState(s => {
+        t.props.b.applyOperation(AddOp(Item(UUID.randomUUID, Some(t.props.item.id), time(), s.addText)))
+        s.copy(isAdding = false, addText = "")
       })
   }
 
@@ -44,9 +56,9 @@ object LodoList {
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)
-              <.form(^.onSubmit --> B.onSubmit(P.item),
+              <.form(^.onSubmit --> B.onEditSubmit(P.item),
                 <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
-                  ^.defaultValue := P.item.contents, ^.onChange ==> B.onEdit)
+                  ^.defaultValue := P.item.contents, ^.onChange ==> B.onEditChange)
               )
             else
               P.item.contents
@@ -66,7 +78,14 @@ object LodoList {
             .map { case (c, i) =>
               LodoList(LodoList.Props(P.b, P.itemMap, c, i))
             },
-          S.isAdding ?= <.div("Hello")
+          S.isAdding ?= <.div(
+            <.a(^.href := "#",
+              <.form(^.onSubmit --> B.onAddSubmit(),
+                <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
+                  ^.onChange ==> B.onAddChange)
+              )
+            )
+          )
         )
       )
     }).build
