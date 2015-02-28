@@ -83,7 +83,6 @@ class ApiService(val system: ActorSystem) extends LodoApi {
 
   override def undo(): Boolean = {
     if (State.undoStack.nonEmpty) {
-      println("undo")
       State.itemMap = State.itemMap.undo(State.undoStack.head)
       opBus.publish(LastOp(State.undoStack.head, OpUndo))
       State.lastOps = State.lastOps.addOp(State.undoStack.head, OpUndo)
@@ -95,7 +94,6 @@ class ApiService(val system: ActorSystem) extends LodoApi {
 
   override def redo(): Boolean = {
     if (State.redoStack.nonEmpty) {
-      println("redo")
       State.itemMap = State.itemMap(State.redoStack.head)
       opBus.publish(LastOp(State.redoStack.head, OpApply))
       State.lastOps = State.lastOps.addOp(State.redoStack.head, OpApply)
@@ -110,15 +108,11 @@ class ApiService(val system: ActorSystem) extends LodoApi {
       val promise = Promise[LastOp]()
       val listener = system.actorOf(Props(new Actor {
         def receive = {
-          case o: LastOp => {
-            println(s"got message $o")
+          case o: LastOp =>
             promise.trySuccess(o)
-          }
         }
       }))
-      println("subscribe")
       opBus.subscribe(listener, ())
-      println("waiting")
       val result = Try(Some(List(Await.result(promise.future, Timeout(5.seconds).duration))))
         .getOrElse(Some(List()))
       opBus.unsubscribe(listener, ())
