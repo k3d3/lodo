@@ -6,11 +6,14 @@ import japgolly.scalajs.react.extra.OnUnmount
 import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 import japgolly.scalajs.react.vdom.prefix_<^._
 
+import autowire._
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+
 import Helper._
 
 object Dashboard {
 
-  case class State(itemMap: ItemMap = items,
+  case class State(itemMap: ItemMap = new ItemMap(),
                    selectedNotebook: Option[UUID] = None,
                    isAdding: Boolean = false,
                    isSidebarShown: Boolean = false,
@@ -18,6 +21,13 @@ object Dashboard {
                    redoStack: List[Op] = List())
 
   class Backend(t: BackendScope[MainRouter.Router, State]) extends OnUnmount {
+    AjaxClient[LodoApi].getItems("test").call().foreach { items: Seq[Item] =>
+      val itemMap = new ItemMap(items)
+      t.modState(s => s.copy(
+        itemMap = itemMap,
+        selectedNotebook = itemMap.notebooks().headOption.map(_.id)))
+    }
+
     def selectNotebook(item: Item) = {
       t.modState(s =>
         s.copy(selectedNotebook = Some(item.id),
@@ -107,27 +117,8 @@ object Dashboard {
     }
   }
 
-  val items: ItemMap = new ItemMap(Seq(
-    Item(testId(0), None, time(), "Notebook0"),
-    Item(testId(1), None, time()+1, "Notebook1"),
-    Item(testId(9), None, time()+2, "Notebook2"),
-
-    Item(UUID.randomUUID, Some(testId(0)), time()+3, "N1Page1"),
-    Item(testId(2), Some(testId(0)), time()+4, "N1Page2"),
-
-    Item(UUID.randomUUID, Some(testId(2)), time()+5, "N1P2List1"),
-    Item(testId(3), Some(testId(2)), time()+6, "N1P2List2"),
-    Item(UUID.randomUUID, Some(testId(3)), time()+7, "N1P2L2Item1"),
-
-    Item(UUID.randomUUID, Some(testId(2)), time()+8, "N1P2List3"),
-    Item(UUID.randomUUID, Some(testId(2)), time()+9, "N1P2List4"),
-    Item(UUID.randomUUID, Some(testId(2)), time()+10, "N1P2List5")
-  ))
-
   val dashboard = ReactComponentB[MainRouter.Router]("Dashboard")
-    .initialStateP(router =>
-      State(selectedNotebook = items.notebooks().headOption.map(_.id))
-    )
+    .initialState(State())
     .backend(new Backend(_))
     .render((router, S, B) => {
       val appLinks = MainRouter.appLinks(router)
