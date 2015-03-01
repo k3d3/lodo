@@ -58,7 +58,7 @@ object Page {
       <.div(^.key := P.item.id.toString,
         ^.cls := "panel panel-info page",
         <.div(^.cls := "panel-heading",
-          ^.draggable := true,
+          ^.draggable := !S.isEditing,
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)

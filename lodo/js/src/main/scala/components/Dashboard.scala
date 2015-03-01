@@ -22,6 +22,7 @@ object Dashboard {
 
   class Backend(t: BackendScope[MainRouter.Router, State]) extends OnUnmount {
     def onInit(): Unit = {
+      println("onInit")
       Client[LodoApi].getItems("mainUser").call().foreach { case (items: Seq[Item], lastOp: Int) =>
         val itemMap = new ItemMap(items)
         t.modState(s => s.copy(
@@ -38,19 +39,22 @@ object Dashboard {
 
     var updateHandle: Option[Int] = None
     def checkForUpdates(): Unit = {
+      println(s"checkForUpdates lastOp: ${t.state.lastOp}")
       val call = Client[LodoApi].getChanges(t.state.lastOp).call()
-      call.onSuccess({ case changeOption: Option[List[LastOp]] =>
-
+      call.onSuccess({ case changeOption: Option[List[OpType]] =>
+        println("changeOption")
+        println(changeOption)
         changeOption match {
           case None =>
-            onInit()
+            dom.location.reload() // TODO: For development only
+            //onInit()
           case Some(changes) =>
             if (changes.nonEmpty)
               t.modState(s => {
                 val itemMap = changes.foldLeft(s.itemMap)((m, i) =>
                   i match {
-                    case LastOp(op, OpApply) => m(i.op)
-                    case LastOp(op, OpUndo) => m.undo(i.op)
+                    case OpApply(op) => m(op)
+                    case OpUndo(op) => m.undo(op)
                   })
                 s.copy(itemMap = itemMap,
                   lastOp = s.lastOp + changes.length,
@@ -68,7 +72,7 @@ object Dashboard {
       })
       call.onFailure({ case _ => {
         updateHandle.foreach(dom.clearTimeout)
-        updateHandle = Some(dom.setTimeout(() => checkForUpdates(), 1000))
+        updateHandle = Some(dom.setTimeout(() => checkForUpdates(), 5000))
       }})
     }
 

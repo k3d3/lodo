@@ -45,6 +45,7 @@ object Notebook {
     .backend(new Backend(_))
     .render((P, S, B) => {
       <.li(^.key := P.item.id.toString,
+        ^.draggable := !S.isEditing,
         (P.selectedNotebook == Some(P.item.id)) ?= (^.cls := "active"),
         <.a(^.href := "#", ^.onClick --> P.b.selectNotebook(P.item),
           <.span(^.cls := "sel-num", P.index),

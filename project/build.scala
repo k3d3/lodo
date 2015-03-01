@@ -47,11 +47,18 @@ object LodoBuild extends Build {
 			libraryDependencies ++= Seq(
 				"io.spray" %% "spray-can" % "1.3.2",
 				"io.spray" %% "spray-routing" % "1.3.2",
-				"com.typesafe.akka" %% "akka-actor" % "2.3.6"
+				"com.typesafe.akka" %% "akka-actor" % "2.3.6",
+        "org.squeryl" %% "squeryl" % "0.9.5-7",
+        "org.slf4j" % "slf4j-simple" % "1.7.2",
+        "com.h2database" % "h2" % "1.2.127",
+        "postgresql" % "postgresql" % "8.4-701.jdbc4"
 			),
       unmanagedResourceDirectories in Compile += file("lodo") / "shared" / "src" / "main" / "resources",
       unmanagedResourceDirectories in Test += file("lodo") / "shared" / "src" / "test" / "resources",
-      javaOptions in Revolver.reStart ++= Seq("-Xmx1G"),
+      javaOptions in Revolver.reStart ++= Seq(
+        "-Xmx1G",
+        "-Dorg.slf4j.simpleLogger.log.sorm=debug"
+      ),
       Revolver.enableDebugging(port = 5002, suspend = false)
     )
 

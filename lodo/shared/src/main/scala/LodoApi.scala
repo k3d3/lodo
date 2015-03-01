@@ -7,5 +7,5 @@ trait LodoApi {
   def redo(): Boolean
   def undo(): Boolean
 
-  def getChanges(index: Int): Option[List[LastOp]]
+  def getChanges(index: Int): Option[List[OpType]]
 }

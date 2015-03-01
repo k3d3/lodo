@@ -3,9 +3,11 @@ package lodo
 import java.util.UUID
 
 // If parent is None, item is at root
-case class Item(id: UUID, parent: Option[UUID], timestamp: Long, contents: String)
+case class Item(id: UUID, parent: Option[UUID], timestamp: Long, contents: String) {
+  def this() = this(new UUID(0, 0), None, 0, "")
+}
 
-case class ItemMap(items: Map[UUID, Item] = Map[UUID, Item]()) {
+case class ItemMap(items: Map[UUID, Item] = Map()) {
   def this(items: Seq[Item]) = this(items.map(i => i.id -> i).toMap)
   def apply(id: Option[UUID]): Option[Item] = id.flatMap(items.lift)
 
@@ -69,7 +71,5 @@ case class MoveOp(item: Item, newParent: Option[UUID]) extends Op
 case class DuplicateOp(item: Item, newId: UUID, newParent: Option[UUID]) extends Op
 
 sealed trait OpType
-case object OpApply extends OpType
-case object OpUndo extends OpType
-
-case class LastOp(op: Op, opType: OpType)
+case class OpApply(op: Op) extends OpType
+case class OpUndo(op: Op) extends OpType

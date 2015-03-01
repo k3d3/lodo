@@ -56,7 +56,7 @@ object LodoList {
       val children = P.itemMap.children(P.item.id)
       <.div(^.cls := "panel panel-default item",
         <.div(^.cls := (if (children.nonEmpty || S.isAdding) "panel-heading" else "panel-body"),
-          ^.draggable := true,
+          ^.draggable := !S.isEditing,
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)
