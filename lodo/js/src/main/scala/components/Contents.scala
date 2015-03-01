@@ -7,7 +7,8 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 import lodo.Helper._
 
 object Contents {
-  case class Props(b: Dashboard.Backend, itemMap: ItemMap, selectedNotebook: Option[UUID], isAdding: Boolean)
+  case class Props(b: Dashboard.Backend, itemMap: ItemMap, selectedNotebook: Option[UUID],
+                   isAdding: Boolean, isSidebarShown: Boolean)
 
   case class State(addText: String = "")
 
@@ -32,12 +33,15 @@ object Contents {
     .backend(new Backend(_))
     .render((P, S, B) => {
       <.div(^.id := "lodo-contents",
-        ^.cls := "col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main",
+        ^.classSet1("main",
+          ("col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3", P.isSidebarShown),
+          ("col-sm-12 col-md-12", !P.isSidebarShown)
+        ),
         P.selectedNotebook.map(n =>
           P.itemMap
             .children(n)
             .zipWithIndex
-            .map{ case (p, i) => Page(Page.Props(P.b, P.itemMap, p, i)) }
+            .map{ case (p, i) => Page(Page.Props(P.b, P.itemMap, p, i, P.isSidebarShown)) }
         ),
         P.isAdding ?= <.div(
           <.a(^.href := "#",

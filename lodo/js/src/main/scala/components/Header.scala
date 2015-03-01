@@ -34,6 +34,8 @@ object Header {
           <.div(^.cls := "navbar-collapse collapse",
             <.ul(^.cls := "nav navbar-nav navbar-right",
               <.li(<.a(^.href := "#",
+                ^.onClick --> P.b.toggleShowSidebar(), "Sidebar")),
+              <.li(<.a(^.href := "#",
                 ^.onClick --> P.b.performUndo(), "Undo")),
               <.li(<.a(^.href := "#",
                 ^.onClick --> P.b.performRedo(), "Redo"))

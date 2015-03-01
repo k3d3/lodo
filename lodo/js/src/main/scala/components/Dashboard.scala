@@ -19,6 +19,7 @@ object Dashboard {
                    isAdding: Boolean = false,
                    isSidebarShown: Boolean = false,
                    lastOp: Int = 0)
+  // Note that isSidebarShown is actually inverted for non-mobile
 
   class Backend(t: BackendScope[MainRouter.Router, State]) extends OnUnmount {
     def onInit(): Unit = {
@@ -147,7 +148,7 @@ object Dashboard {
       <.div(
         Header(Header.Props(B)),
         Sidebar(Sidebar.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, S.isSidebarShown)),
-        Contents(Contents.Props(B, S.itemMap, S.selectedNotebook, S.isAdding))
+        Contents(Contents.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, !S.isSidebarShown))
       )
     }).build
 }

@@ -53,7 +53,7 @@ body {
 }
 
 @media (min-width: 768px) {
-    .sidebar {
+    .sidebar:not(.sidebar-shown) {
         position: fixed;
         top: 50px;
         bottom: 0;

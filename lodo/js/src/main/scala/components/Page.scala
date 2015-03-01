@@ -7,7 +7,8 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 import Helper._
 
 object Page {
-  case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int)
+  case class Props(b: Dashboard.Backend, itemMap: ItemMap,
+                   item: Item, index: Int, isSidebarShown: Boolean)
 
   case class State(isAdding: Boolean = false, isEditing: Boolean = false,
                    addText: String = "", editText: String)
@@ -49,6 +50,17 @@ object Page {
     }
   }
 
+  def columnize[A](items: Seq[A], count: Int): Seq[Seq[A]] = {
+    import scala.collection.mutable.Buffer
+    items
+      .zipWithIndex
+      .foldLeft(Seq.fill(count)(Buffer[A]())){ case (lists, (item, index)) =>
+        lists(index % count) += item
+        lists
+      }
+      .map(_.toSeq)
+  }
+
   val page = ReactComponentB[Props]("Page")
     .initialStateP(P => State(editText = P.item.contents))
     .backend(new Backend(_))
@@ -79,11 +91,13 @@ object Page {
           )
         ),
         (children.nonEmpty || S.isAdding) ?= <.div(^.cls := "panel-body",
-          children.nonEmpty ?= children
-            .zipWithIndex
-            .grouped((children.length+2-1)/2)
+          children.nonEmpty ?=
+            columnize(children.zipWithIndex, if (P.isSidebarShown) 2 else 3)
             .map(iL => {
-              <.div(^.cls := "col-sm-6",
+              <.div(^.classSet(
+                ("col-sm-6", P.isSidebarShown),
+                ("col-sm-4", !P.isSidebarShown)
+              ),
                 iL.map{ case (c, i) =>
                   LodoList(LodoList.Props(P.b, P.itemMap, c, i))
                 }
