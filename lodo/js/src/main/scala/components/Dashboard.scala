@@ -22,7 +22,6 @@ object Dashboard {
 
   class Backend(t: BackendScope[MainRouter.Router, State]) extends OnUnmount {
     def onInit(): Unit = {
-      println("onInit")
       Client[LodoApi].getItems("mainUser").call().foreach { case (items: Seq[Item], lastOp: Int) =>
         val itemMap = new ItemMap(items)
         t.modState(s => s.copy(
@@ -39,11 +38,8 @@ object Dashboard {
 
     var updateHandle: Option[Int] = None
     def checkForUpdates(): Unit = {
-      println(s"checkForUpdates lastOp: ${t.state.lastOp}")
       val call = Client[LodoApi].getChanges(t.state.lastOp).call()
       call.onSuccess({ case changeOption: Option[List[OpType]] =>
-        println("changeOption")
-        println(changeOption)
         changeOption match {
           case None =>
             dom.location.reload() // TODO: For development only

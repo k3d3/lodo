@@ -32,7 +32,6 @@ object Server extends SimpleRoutingApp {
       } ~
       post {
         path("api" / Segments) { s =>
-          println(s"call to $s")
           extract(_.request.entity.asString) { e =>
             onComplete(Future {
               Router.route[LodoApi](apiService)(
