@@ -89,6 +89,12 @@ object Page {
     }
   }
 
+  def columnize[A](items: Seq[A], count: Int): Seq[Seq[A]] = {
+    items
+      .grouped((items.length+count-1)/count)
+      .toSeq
+  }
+
   val page = ReactComponentB[Props]("Page")
     .initialStateP(P => State(editText = P.item.contents))
     .backend(new Backend(_))
