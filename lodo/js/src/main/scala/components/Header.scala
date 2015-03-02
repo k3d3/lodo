@@ -34,7 +34,7 @@ object Header {
           <.div(^.cls := "navbar-collapse collapse",
             <.ul(^.cls := "nav navbar-nav",
               <.li(<.a(^.href := "#",
-                ^.onClick --> P.b.toggleShowSidebar(), "Toggle Sidebar"))
+                ^.onClick --> P.b.toggleShowSidebar(), "Toggle Notebooks"))
             ),
             <.ul(^.cls := "nav navbar-nav navbar-right",
 

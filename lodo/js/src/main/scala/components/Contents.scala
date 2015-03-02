@@ -34,6 +34,7 @@ object Contents {
       t.modState(_.copy(isDragOver = false))
 
     def onDragOver(e: ReactDragEvent) = {
+      t.modState(_.copy(isDragOver = true))
       e.stopPropagation()
       e.preventDefault()
     }
