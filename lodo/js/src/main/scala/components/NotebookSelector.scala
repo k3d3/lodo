@@ -12,7 +12,9 @@ object NotebookSelector {
                    selectedNotebook: Option[UUID],
                    isAdding: Boolean)
 
-  case class State(isNotebookAdding: Boolean = false, addText: String = "")
+  case class State(isNotebookAdding: Boolean = false,
+                   addText: String = "",
+                   isDragOver: Boolean = false)
 
   class Backend(t: BackendScope[Props, State]) {
     def onClickAdd() = {
@@ -33,6 +35,31 @@ object NotebookSelector {
       })
     }
 
+    def onDragEnter(e: ReactDragEvent) =
+      t.modState(_.copy(isDragOver = true))
+
+    def onDragLeave(e: ReactDragEvent) =
+      t.modState(_.copy(isDragOver = false))
+
+    def onDragOver(e: ReactDragEvent) = {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+
+    def onDrop(e: ReactDragEvent): Unit = {
+      e.stopPropagation()
+      e.preventDefault()
+
+      val src = UUID.fromString(e.dataTransfer.getData("lodo"))
+
+      val item = t.props.itemMap(Some(src))
+
+      t.modState(_.copy(isDragOver = false))
+
+      item.map(item => {
+        t.props.b.moveAndSelectNotebook(MoveOp(item, None), item.id)
+      })
+    }
   }
 
   val notebookSelector = ReactComponentB[Props]("NotebookSelector")
@@ -56,9 +83,17 @@ object NotebookSelector {
           )
         else
           <.li(
-            <.a(^.href := "#", ^.onClick --> B.onClickAdd(),
-              <.span(^.cls := "glyphicon glyphicon-plus")
-            )
+            ^.classSet(("dragover", S.isDragOver)),
+            ^.onDragEnter ==> B.onDragEnter,
+            ^.onDragLeave ==> B.onDragLeave,
+            ^.onDragOver ==> B.onDragOver,
+            ^.onDrop ==> B.onDrop,
+              <.a(^.href := "#", ^.onClick --> B.onClickAdd(),
+                <.span(^.cls := "glyphicon glyphicon-plus"),
+                <.span(^.classSet(("draghidden", !S.isDragOver)),
+                  " Create notebook from item"
+                )
+              )
           )
       )
     )

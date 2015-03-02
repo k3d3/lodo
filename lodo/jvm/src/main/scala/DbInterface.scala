@@ -29,7 +29,11 @@ object DbInterface {
         )
       case op: CompleteOp =>
         items.deleteWhere(_.id === op.item.id)
-      case op: MoveOp => ()
+      case op: MoveOp =>
+        update(items)(s =>
+          where(s.id === op.item.id)
+          set(s.parent := op.newParent)
+        )
       case op: DuplicateOp => ()
     }
   }
@@ -45,7 +49,11 @@ object DbInterface {
         )
       case op: CompleteOp =>
         items.insert(op.item)
-      case op: MoveOp => ()
+      case op: MoveOp =>
+        update(items)(s =>
+          where(s.id === op.item.id)
+            set(s.parent := op.item.parent)
+        )
       case op: DuplicateOp => ()
     }
   }

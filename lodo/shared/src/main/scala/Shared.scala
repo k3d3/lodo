@@ -15,8 +15,18 @@ object Helper {
     case Js.Str(s) => UUID.fromString(s)
   }
 
-  def testId(index: Int) = UUID.fromString(f"00000000-0000-0000-0000-$index%012d")
   def time(): Long = System.currentTimeMillis()
+
+  def columnize[A](items: Seq[A], count: Int): Seq[Seq[A]] = {
+    import scala.collection.mutable.Buffer
+    items
+      .zipWithIndex
+      .foldLeft(Seq.fill(count)(Buffer[A]())){ case (lists, (item, index)) =>
+        lists(index % count) += item
+        lists
+      }
+      .map(_.toSeq)
+  }
 }
 
 trait Api{

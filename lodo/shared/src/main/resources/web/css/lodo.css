@@ -178,6 +178,28 @@ body {
 }
 
 [draggable=true] {
-  -moz-user-drag: element;
-  -webkit-user-drag: element;
+    -moz-user-drag: element;
+    -webkit-user-drag: element;
+    cursor: move;
+}
+
+a [draggable=true] {
+    cursor: move;
+}
+
+.dragging {
+    opacity: 0.5;
+}
+
+.dragover {
+    border: 2px dashed #000;
+}
+
+.draghidden {
+    /* instead of display: none so we take up the same space */
+    visibility: hidden;
+}
+
+#lodo-contents {
+    padding-bottom: 100px;
 }

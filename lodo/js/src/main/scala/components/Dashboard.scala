@@ -73,11 +73,23 @@ object Dashboard {
       }})
     }
 
-    def selectNotebook(item: Item) = {
+    def selectNotebook(item: Item) =
       t.modState(s =>
         s.copy(selectedNotebook = Some(item.id),
           isAdding = if (s.selectedNotebook == Some(item.id)) s.isAdding else false))
-    }
+
+    def moveAndSelectNotebook(op: MoveOp, itemId: UUID) =
+      t.modState { s =>
+        val newItemMap = s.itemMap(op)
+        newItemMap
+          .getNotebook(itemId)
+          .fold(s.copy(itemMap = newItemMap)) { n =>
+            s.copy(
+              selectedNotebook = Some(n.id),
+              itemMap = newItemMap
+            )
+          }
+      }
 
     def toggleShowSidebar() = {
       t.modState(s => s.copy(isSidebarShown = !s.isSidebarShown))

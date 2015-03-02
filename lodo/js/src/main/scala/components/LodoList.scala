@@ -4,13 +4,14 @@ import java.util.UUID
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
-import lodo.Helper._
+import Helper._
 
 object LodoList {
   case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int)
 
   case class State(isAdding: Boolean = false,isEditing: Boolean = false,
-                   addText: String = "", editText: String)
+                   addText: String = "", editText: String,
+                   isDragging: Boolean = false, isDragOver: Boolean = false)
 
   class Backend(t: BackendScope[Props, State]) {
     def onClickEdit(item: Item) =
@@ -47,6 +48,42 @@ object LodoList {
         s.copy(isAdding = false, addText = "")
       })
     }
+
+    def onDragStart(e: ReactDragEvent) = {
+      e.dataTransfer.effectAllowed = "move"
+      e.dataTransfer.setData("lodo", t.props.item.id.toString)
+      t.modState(_.copy(isDragging = true, isDragOver = true))
+    }
+
+    def onDragEnd(e: ReactDragEvent) =
+      t.modState(_.copy(isDragging = false, isDragOver = true))
+
+    def onDragEnter(e: ReactDragEvent) =
+      t.modState(_.copy(isDragOver = true, isDragging = false))
+
+    def onDragLeave(e: ReactDragEvent) =
+      t.modState(_.copy(isDragOver = false, isDragging = false))
+
+    def onDragOver(e: ReactDragEvent) = {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+
+    def onDrop(e: ReactDragEvent): Unit = {
+      e.stopPropagation()
+      e.preventDefault()
+      t.modState(_.copy(isDragOver = false, isDragging = false))
+
+      val src = UUID.fromString(e.dataTransfer.getData("lodo"))
+      val dst = t.props.item.id
+
+      if (src == dst || t.props.itemMap.isChild(src, dst))
+        return // Don't allow drop on self or child
+
+      t.props.itemMap(Some(src)).map(item => {
+        t.props.b.applyOperation(MoveOp(item, Some(dst)))
+      })
+    }
   }
 
   val list = ReactComponentB[Props]("List")
@@ -56,7 +93,19 @@ object LodoList {
       val children = P.itemMap.children(P.item.id)
       <.div(^.cls := "panel panel-default item",
         <.div(^.cls := (if (children.nonEmpty || S.isAdding) "panel-heading" else "panel-body"),
+          ^.classSet(
+            ("panel-heading", children.nonEmpty || S.isAdding),
+            ("panel-body", !(children.nonEmpty || S.isAdding)),
+            ("dragging", S.isDragging),
+            ("dragover", S.isDragOver)
+          ),
           ^.draggable := !S.isEditing,
+          ^.onDragEnter ==> B.onDragEnter,
+          ^.onDragLeave ==> B.onDragLeave,
+          ^.onDragOver ==> B.onDragOver,
+          ^.onDrop ==> B.onDrop,
+          ^.onDragStart ==> B.onDragStart,
+          ^.onDragEnd ==> B.onDragEnd,
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)
@@ -83,11 +132,9 @@ object LodoList {
               LodoList(LodoList.Props(P.b, P.itemMap, c, i))
             },
           S.isAdding ?= <.div(
-            <.a(^.href := "#",
-              <.form(^.onSubmit ==> B.onAddSubmit,
-                <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
-                  ^.onChange ==> B.onAddChange)
-              )
+            <.form(^.onSubmit ==> B.onAddSubmit,
+              <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
+                ^.onChange ==> B.onAddChange)
             )
           )
         )

@@ -11,7 +11,8 @@ object Page {
                    item: Item, index: Int, isSidebarShown: Boolean)
 
   case class State(isAdding: Boolean = false, isEditing: Boolean = false,
-                   addText: String = "", editText: String)
+                   addText: String = "", editText: String,
+                   isDragging: Boolean = false, isDragOver: Boolean = false)
 
   class Backend(t: BackendScope[Props, State]) {
     def onClickEdit(item: Item) =
@@ -44,21 +45,48 @@ object Page {
     def onAddSubmit(e: ReactEvent) = {
       e.preventDefault()
       t.modState(s => {
-        t.props.b.applyOperation(AddOp(Item(UUID.randomUUID, Some(t.props.item.id), time(), s.addText)))
+        t.props.b.applyOperation(
+          AddOp(Item(UUID.randomUUID, Some(t.props.item.id), time(), s.addText))
+        )
         s.copy(isAdding = false, addText = "")
       })
     }
-  }
 
-  def columnize[A](items: Seq[A], count: Int): Seq[Seq[A]] = {
-    import scala.collection.mutable.Buffer
-    items
-      .zipWithIndex
-      .foldLeft(Seq.fill(count)(Buffer[A]())){ case (lists, (item, index)) =>
-        lists(index % count) += item
-        lists
-      }
-      .map(_.toSeq)
+    def onDragStart(e: ReactDragEvent) = {
+      e.dataTransfer.effectAllowed = "move"
+      e.dataTransfer.setData("lodo", t.props.item.id.toString)
+      t.modState(_.copy(isDragging = true, isDragOver = false))
+    }
+
+    def onDragEnd(e: ReactDragEvent) =
+      t.modState(_.copy(isDragging = false, isDragOver = false))
+
+    def onDragEnter(e: ReactDragEvent) =
+      t.modState(_.copy(isDragOver = true, isDragging = false))
+
+    def onDragLeave(e: ReactDragEvent) =
+      t.modState(_.copy(isDragOver = false, isDragging = false))
+
+    def onDragOver(e: ReactDragEvent) = {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+
+    def onDrop(e: ReactDragEvent): Unit = {
+      e.stopPropagation()
+      e.preventDefault()
+      t.modState(_.copy(isDragOver = false, isDragging = false))
+
+      val src = UUID.fromString(e.dataTransfer.getData("lodo"))
+      val dst = t.props.item.id
+
+      if (src == dst || t.props.itemMap.isChild(src, dst))
+        return // Don't allow drop on self or child
+
+      t.props.itemMap(Some(src)).map(item => {
+        t.props.b.applyOperation(MoveOp(item, Some(dst)))
+      })
+    }
   }
 
   val page = ReactComponentB[Props]("Page")
@@ -68,9 +96,19 @@ object Page {
       val children = P.itemMap.children(P.item.id)
 
       <.div(^.key := P.item.id.toString,
-        ^.cls := "panel panel-info page",
+        ^.classSet1(
+          "panel panel-info page",
+          ("dragging", S.isDragging),
+          ("dragover", S.isDragOver)
+        ),
+        ^.onDragEnter ==> B.onDragEnter,
+        ^.onDragLeave ==> B.onDragLeave,
+        ^.onDragOver ==> B.onDragOver,
+        ^.onDrop ==> B.onDrop,
         <.div(^.cls := "panel-heading",
           ^.draggable := !S.isEditing,
+          ^.onDragStart ==> B.onDragStart,
+          ^.onDragEnd ==> B.onDragEnd,
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)

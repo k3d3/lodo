@@ -32,9 +32,12 @@ object Header {
             )
           ),
           <.div(^.cls := "navbar-collapse collapse",
-            <.ul(^.cls := "nav navbar-nav navbar-right",
+            <.ul(^.cls := "nav navbar-nav",
               <.li(<.a(^.href := "#",
-                ^.onClick --> P.b.toggleShowSidebar(), "Sidebar")),
+                ^.onClick --> P.b.toggleShowSidebar(), "Toggle Sidebar"))
+            ),
+            <.ul(^.cls := "nav navbar-nav navbar-right",
+
               <.li(<.a(^.href := "#",
                 ^.onClick --> P.b.performUndo(), "Undo")),
               <.li(<.a(^.href := "#",

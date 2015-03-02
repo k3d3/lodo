@@ -60,6 +60,17 @@ case class ItemMap(items: Map[UUID, Item] = Map()) {
       .flatMap(i => recursiveChildren(i.id))
       .toSeq ++ childItems
   }
+
+  def isChild(itemId: UUID, childId: UUID): Boolean =
+    recursiveChildren(itemId).filter(_.id == childId).nonEmpty
+
+  def getNotebook(itemId: UUID): Option[Item] =
+    apply(Some(itemId)).flatMap{item =>
+      if (item.parent == None)
+        Some(item)
+      else
+        getNotebook(item.id)
+    }
 }
 
 // We need to ensure there's enough information to reverse operations

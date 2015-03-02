@@ -10,7 +10,8 @@ object Notebook {
                    isAdding: Boolean, itemMap: ItemMap, item: Item, index: Int)
 
   case class State(isEditing: Boolean = false,
-                   addText: String = "", editText: String)
+                   addText: String = "", editText: String,
+                   isDragging: Boolean = false, isDragOver: Boolean = false)
 
   class Backend(t: BackendScope[Props, State]) {
     def onClickEdit(item: Item) = {
@@ -38,6 +39,48 @@ object Notebook {
         s.copy(isEditing = false)
       })
     }
+
+    def onDragStart(e: ReactDragEvent) = {
+      e.dataTransfer.effectAllowed = "move"
+      e.dataTransfer.setData("lodo", t.props.item.id.toString)
+      t.modState(_.copy(isDragging = true, isDragOver = false))
+    }
+
+    def onDragEnd(e: ReactDragEvent) =
+      t.modState(_.copy(isDragging = false, isDragOver = false))
+
+    def onDragEnter(e: ReactDragEvent) = {
+      t.modState(_.copy(isDragOver = true, isDragging = false))
+      t.props.b.selectNotebook(t.props.item)
+    }
+
+    def onDragLeave(e: ReactDragEvent) =
+      t.modState(_.copy(isDragOver = false, isDragging = false))
+
+    def onDragOver(e: ReactDragEvent) = {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+
+    def onDrop(e: ReactDragEvent): Unit = {
+      e.stopPropagation()
+      e.preventDefault()
+      t.modState(_.copy(isDragOver = false, isDragging = false))
+
+      val src = UUID.fromString(e.dataTransfer.getData("lodo"))
+      val dst = t.props.item.id
+
+      if (src == dst || t.props.itemMap.isChild(src, dst))
+        return // Don't allow drop on self or child
+
+      t.props.itemMap(Some(src)).map(item => {
+        val op = MoveOp(item, Some(dst))
+        if (t.props.selectedNotebook == Some(src))
+          t.props.b.moveAndSelectNotebook(op, dst)
+        else
+          t.props.b.applyOperation(op)
+      })
+    }
   }
 
   val notebook = ReactComponentB[Props]("Notebook")
@@ -46,8 +89,18 @@ object Notebook {
     .render((P, S, B) => {
       <.li(^.key := P.item.id.toString,
         ^.draggable := !S.isEditing,
-        (P.selectedNotebook == Some(P.item.id)) ?= (^.cls := "active"),
+        ^.onDragEnter ==> B.onDragEnter,
+        ^.onDragLeave ==> B.onDragLeave,
+        ^.onDragOver ==> B.onDragOver,
+        ^.onDrop ==> B.onDrop,
+        ^.classSet(
+          ("active", P.selectedNotebook == Some(P.item.id)),
+          ("dragging", S.isDragging),
+          ("dragover", S.isDragOver)
+        ),
         <.a(^.href := "#", ^.onClick --> P.b.selectNotebook(P.item),
+          ^.onDragStart ==> B.onDragStart,
+          ^.onDragEnd ==> B.onDragEnd,
           <.span(^.cls := "sel-num", P.index),
           <.span(^.cls := "content",
             if (S.isEditing)
