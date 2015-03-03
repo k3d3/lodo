@@ -31,14 +31,15 @@ object Dashboard {
           selectedNotebook = itemMap.notebooks().headOption.map(_.id),
           lastOp = lastOp)
         )
-        updateHandle.foreach(dom.clearTimeout)
-        updateHandle = Some(org.scalajs.dom.setTimeout(() => checkForUpdates(), 0))
+        updateHandles.foreach(dom.clearTimeout)
+        updateHandles = List()
+        updateHandles :+ org.scalajs.dom.setTimeout(() => checkForUpdates(), 0)
       }
     }
 
     onInit()
 
-    var updateHandle: Option[Int] = None
+    var updateHandles: List[Int] = List()
     def checkForUpdates(): Unit = {
       val call = Client[LodoApi].getChanges(t.state.lastOp).call()
       call.onSuccess({ case changeOption: Option[List[OpType]] =>
@@ -65,12 +66,14 @@ object Dashboard {
               })
         }
 
-        updateHandle.foreach(dom.clearTimeout)
-        updateHandle = Some(dom.setTimeout(() => checkForUpdates(), 0))
+        updateHandles.foreach(dom.clearTimeout)
+        updateHandles = List()
+        updateHandles :+ dom.setTimeout(() => checkForUpdates(), 0)
       })
       call.onFailure({ case _ => {
-        updateHandle.foreach(dom.clearTimeout)
-        updateHandle = Some(dom.setTimeout(() => checkForUpdates(), 5000))
+        updateHandles.foreach(dom.clearTimeout)
+        updateHandles = List()
+        updateHandles :+ dom.setTimeout(() => checkForUpdates(), 1000)
       }})
     }
 
@@ -96,18 +99,18 @@ object Dashboard {
       t.modState(s => s.copy(isSidebarShown = !s.isSidebarShown))
     }
 
-    def performUndo()(e: ReactEvent): Future[Boolean] = {
+    def performUndo()(e: ReactEvent): Future[Boolean] = Future {
       e.preventDefault()
       e.stopPropagation()
       Client[LodoApi].undo().call()
-      Future(false)
+      false
     }
 
-    def performRedo()(e: ReactEvent): Future[Boolean] = {
+    def performRedo()(e: ReactEvent): Future[Boolean] = Future {
       e.preventDefault()
       e.stopPropagation()
       Client[LodoApi].redo().call()
-      Future(false)
+      false
     }
 
     def onClickComplete(item: Item) = {

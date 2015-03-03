@@ -56,9 +56,9 @@ class ApiService(val system: ActorSystem) extends LodoApi {
 
 
   override def applyOperation(op: Op): Boolean = {
+    State.lastOps = State.lastOps.addOp(OpApply(op))
     State.itemMap = State.itemMap(op)
     opBus.publish(OpApply(op))
-    State.lastOps = State.lastOps.addOp(OpApply(op))
     State.undoStack = (op :: State.undoStack).take(State.stackLimit)
     State.redoStack = List()
     DbInterface.apply(op)
@@ -67,10 +67,10 @@ class ApiService(val system: ActorSystem) extends LodoApi {
 
   override def undo(): Boolean = {
     if (State.undoStack.nonEmpty) {
+      State.lastOps = State.lastOps.addOp(OpUndo(State.undoStack.head))
       State.itemMap = State.itemMap.undo(State.undoStack.head)
       opBus.publish(OpUndo(State.undoStack.head))
       DbInterface.undo(State.undoStack.head)
-      State.lastOps = State.lastOps.addOp(OpUndo(State.undoStack.head))
       State.redoStack = (State.undoStack.head :: State.redoStack).take(State.stackLimit)
       State.undoStack = State.undoStack.tail
     }
@@ -79,10 +79,10 @@ class ApiService(val system: ActorSystem) extends LodoApi {
 
   override def redo(): Boolean = {
     if (State.redoStack.nonEmpty) {
+      State.lastOps = State.lastOps.addOp(OpApply(State.redoStack.head))
       State.itemMap = State.itemMap(State.redoStack.head)
       opBus.publish(OpApply(State.redoStack.head))
       DbInterface.undo(State.redoStack.head)
-      State.lastOps = State.lastOps.addOp(OpApply(State.redoStack.head))
       State.undoStack = (State.redoStack.head :: State.undoStack).take(State.stackLimit)
       State.redoStack = State.redoStack.tail
     }
@@ -90,6 +90,7 @@ class ApiService(val system: ActorSystem) extends LodoApi {
   }
 
   override def getChanges(lastOp: Int): Option[List[OpType]] = {
+    println(s"lastOp: $lastOp, lastIndex: ${State.lastOps.lastIndex}")
     if (State.lastOps.waitForNewOp(lastOp)) {
       val promise = Promise[OpType]()
       val listener = system.actorOf(Props(new Actor {
