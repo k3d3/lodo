@@ -1,5 +1,7 @@
 # Lodo
 
+[![Join the chat at https://gitter.im/k3d3/lodo](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/k3d3/lodo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Lodo is an application that uses a tree of lists to organize many projects and to-do lists.
 
 The application is organized into notebooks, pages and lists. Notebooks are the top level and
