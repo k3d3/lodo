@@ -3,8 +3,11 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._
 import sbt._
 import spray.revolver.RevolverPlugin._
+import sbtassembly.AssemblyKeys._
+import sbtassembly.AssemblyPlugin._
+import spray.revolver.{GlobalState, RevolverState}
 
-object LodoBuild extends Build {
+object Build extends sbt.Build {
 	lazy val lodoRoot = project.in(file("lodo"))
 		.aggregate(lodoJS, lodoJVM)
 		.settings(
@@ -26,21 +29,22 @@ object LodoBuild extends Build {
 			libraryDependencies ++= Seq(
 				"com.lihaoyi" %%% "autowire" % "0.2.4",
 				"com.lihaoyi" %%% "upickle" % "0.2.6"
-			)
+			),
+      assemblyExcludedJars in assembly := {
+        (fullClasspath in Compile).value filter { _.data.getName.contains("sjs0.6_2.11") }
+      }
 		)
     .jsSettings(workbenchSettings: _*)
     .jsSettings(
       libraryDependencies ++= Seq(
         "org.scala-js" %%% "scalajs-dom" % "0.8.0",
         "com.github.japgolly.scalajs-react" %%% "core" % "0.8.0",
-        "com.github.japgolly.scalajs-react" %%% "extra" % "0.8.0",
-        "com.lihaoyi" %%% "scalarx" % "0.2.7",
-        "com.lihaoyi" %%% "utest" % "0.3.0"
+        "com.github.japgolly.scalajs-react" %%% "extra" % "0.8.0"
       ),
       testFrameworks += new TestFramework("utest.runner.Framework"),
       localUrl := ("localhost", 5001),
-      refreshBrowsers <<= refreshBrowsers.triggeredBy(fastOptJS in Compile),
-      bootSnippet := "Main().main();"
+      bootSnippet := "Main().main();",
+      (assemblyExcludedJars in assembly) <<= (fullClasspath in Compile)
     )
 		.jvmSettings(Revolver.settings: _*)
 		.jvmSettings(
@@ -57,9 +61,8 @@ object LodoBuild extends Build {
       unmanagedResourceDirectories in Test += file("lodo") / "shared" / "src" / "test" / "resources",
       javaOptions in Revolver.reStart ++= Seq(
         "-Xmx1G",
-        "-Dorg.slf4j.simpleLogger.log.sorm=debug"
-      ),
-      Revolver.enableDebugging(port = 5002, suspend = false)
+        "-DDEVMODE=true"
+      )
     )
 
   val scalaJsOutputDir = Def.settingKey[File]("ScalaJS Output Directory")
@@ -68,17 +71,16 @@ object LodoBuild extends Build {
     crossTarget in(lodoJS, Compile, packageJSKey) := scalaJsOutputDir.value
   }
 
-  lazy val lodoJS: Project = lodo.js.settings(
-    fastOptJS in Compile := {
-      val base = (fastOptJS in Compile).value
-      IO.copyFile(base.data, (classDirectory in Compile).value / "web" / "js" / base.data.getName)
-      IO.copyFile(base.data, (classDirectory in Compile).value / "web" / "js" / (base.data.getName + ".map"))
-      base
-    }
-  )
+  lazy val buildJS = TaskKey[Unit]("buildJS", "Does things")
+  lazy val buildJS2 = TaskKey[Unit]("buildJS2", "Does things")
 
-  lazy val lodoJVM: Project = lodo.jvm.settings(js2jvmSettings: _*).settings(
-    scalaJsOutputDir := (classDirectory in Compile).value / "web" / "js",
-    compile in Compile <<= (compile in Compile) dependsOn (fastOptJS in(lodoJS, Compile))
-  )
+  lazy val lodoJS: Project = lodo.js
+
+  lazy val lodoJVM: Project = lodo.jvm.settings(js2jvmSettings: _*)
+    .settings(assemblySettings: _*)
+    .settings(
+      scalaJsOutputDir := (classDirectory in Compile).value / "web" / "js",
+      Revolver.reForkOptions <<= Revolver.reForkOptions dependsOn (fastOptJS in (lodoJS, Compile)),
+      assembly <<= assembly dependsOn (fullOptJS in (lodoJS, Compile))
+    )
 }

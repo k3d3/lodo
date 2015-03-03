@@ -16,9 +16,12 @@ object Router extends autowire.Server[String, upickle.Reader, upickle.Writer] {
 
 object Server extends SimpleRoutingApp {
   def main(args: Array[String]): Unit = {
+
+
     implicit val system = ActorSystem("Main")
     implicit val context = system.dispatcher
 
+    val devMode = System.getProperty("DEVMODE", "false").toBoolean
     val port = Properties.envOrElse("PORT", "5000").toInt
 
     val apiService = new ApiService(system)
@@ -26,7 +29,10 @@ object Server extends SimpleRoutingApp {
     startServer("0.0.0.0", port = port) {
       get {
         pathSingleSlash {
-          getFromResource("web/index.html")
+          if (devMode)
+            getFromResource("web/index.html")
+          else
+            getFromResource("web/index-full.html")
         } ~
         getFromResourceDirectory("web")
       } ~
