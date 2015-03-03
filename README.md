@@ -42,3 +42,7 @@ Alternatively, if you want to develop on Lodo:
 
 This will compile the code in dev mode and run it. Any changes made to the source will make
 the code recompile and will restart the server. It will also compile much faster.
+
+# License
+
+The code contained in this repository is licensed under the MIT license.
