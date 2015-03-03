@@ -93,6 +93,7 @@ object Build extends sbt.Build {
           MergeStrategy.discard
         case x =>
           (assemblyMergeStrategy in assembly).value(x)
-      }
+      },
+      target in assembly := file(".")
     )
 }
