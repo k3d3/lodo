@@ -1,5 +1,7 @@
 package lodo
 
+import java.util.UUID
+
 import akka.actor._
 import akka.event.{ActorEventBus, LookupClassification}
 import akka.util.Timeout
@@ -51,8 +53,11 @@ class ApiService(val system: ActorSystem) extends LodoApi {
     var lastOps = LastOps(List(), 0)
   }
 
-  override def getItems(user: String): (Seq[Item], Int) =
-    (State.itemMap.items.map{ case (_, item) => item }.toSeq, State.lastOps.lastIndex)
+  val sessId = UUID.randomUUID()
+
+  // Return items, plus current lastOp index and session ID
+  override def getItems(user: String): (Seq[Item], Int, UUID) =
+    (State.itemMap.items.map{ case (_, item) => item }.toSeq, State.lastOps.lastIndex, sessId)
 
 
   override def applyOperation(op: Op): Boolean = {
@@ -89,8 +94,9 @@ class ApiService(val system: ActorSystem) extends LodoApi {
     true
   }
 
-  override def getChanges(lastOp: Int): Option[List[OpType]] = {
-    println(s"lastOp: $lastOp, lastIndex: ${State.lastOps.lastIndex}")
+  override def getChanges(lastOp: Int, sessId: UUID): Option[List[OpType]] = {
+    if (sessId != this.sessId)
+      None // Restart the client
     if (State.lastOps.waitForNewOp(lastOp)) {
       val promise = Promise[OpType]()
       val listener = system.actorOf(Props(new Actor {

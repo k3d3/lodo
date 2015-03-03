@@ -19,17 +19,18 @@ object Dashboard {
                    selectedNotebook: Option[UUID] = None,
                    isAdding: Boolean = false,
                    isSidebarShown: Boolean = false,
-                   lastOp: Int = 0)
+                   lastOp: Int = 0, sessId: UUID = new UUID(0, 0))
   // Note that isSidebarShown is actually inverted for non-mobile
 
   class Backend(t: BackendScope[MainRouter.Router, State]) extends OnUnmount {
     def onInit(): Unit = {
-      Client[LodoApi].getItems("mainUser").call().foreach { case (items: Seq[Item], lastOp: Int) =>
+      Client[LodoApi].getItems("mainUser").call().foreach { case (items: Seq[Item], lastOp: Int, sessId: UUID) =>
         val itemMap = new ItemMap(items)
         t.modState(s => s.copy(
           itemMap = itemMap,
           selectedNotebook = itemMap.notebooks().headOption.map(_.id),
-          lastOp = lastOp)
+          lastOp = lastOp,
+          sessId = sessId)
         )
         updateHandles.foreach(dom.clearTimeout)
         updateHandles = List()
@@ -41,7 +42,7 @@ object Dashboard {
 
     var updateHandles: List[Int] = List()
     def checkForUpdates(): Unit = {
-      val call = Client[LodoApi].getChanges(t.state.lastOp).call()
+      val call = Client[LodoApi].getChanges(t.state.lastOp, t.state.sessId).call()
       call.onSuccess({ case changeOption: Option[List[OpType]] =>
         changeOption match {
           case None =>
@@ -52,7 +53,7 @@ object Dashboard {
               t.modState(s => {
                 val itemMap = changes.foldLeft(s.itemMap)((m, i) =>
                   i match {
-                    case OpApply(op) => m(op)
+                    case OpApply(op) => m(op) 
                     case OpUndo(op) => m.undo(op)
                   })
                 s.copy(itemMap = itemMap,
