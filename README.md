@@ -36,7 +36,7 @@ Alternatively, if you want to develop on Lodo:
 
     ./bin/sbt ~re-start
 
-(if you're using zsh as a shell, you might need to use \~ instead of ~)
+(if you're using zsh as a shell, you might need to use \\~ instead of ~)
 
 This will compile the code in dev mode and run it. Any changes made to the source will make
 the code recompile and will restart the server. It will also compile much faster.
