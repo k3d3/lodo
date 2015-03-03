@@ -99,7 +99,7 @@ class ApiService(val system: ActorSystem) extends LodoApi {
         }
       }))
       opBus.subscribe(listener, ())
-      val result = Try(Some(List(Await.result(promise.future, Timeout(5.seconds).duration))))
+      val result = Try(Some(List(Await.result(promise.future, Timeout(15.seconds).duration))))
         .getOrElse(Some(List()))
       opBus.unsubscribe(listener, ())
       result

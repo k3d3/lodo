@@ -3,11 +3,12 @@ package lodo
 import java.util.UUID
 
 import japgolly.scalajs.react.extra.OnUnmount
-import japgolly.scalajs.react.{BackendScope, ReactComponentB}
+import japgolly.scalajs.react.{ReactMouseEventH, ReactEvent, BackendScope, ReactComponentB}
 import japgolly.scalajs.react.vdom.prefix_<^._
 import org.scalajs.dom
 
 import autowire._
+import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
 import Helper._
@@ -95,12 +96,18 @@ object Dashboard {
       t.modState(s => s.copy(isSidebarShown = !s.isSidebarShown))
     }
 
-    def performUndo() = {
+    def performUndo()(e: ReactEvent): Future[Boolean] = {
+      e.preventDefault()
+      e.stopPropagation()
       Client[LodoApi].undo().call()
+      Future(false)
     }
 
-    def performRedo() = {
+    def performRedo()(e: ReactEvent): Future[Boolean] = {
+      e.preventDefault()
+      e.stopPropagation()
       Client[LodoApi].redo().call()
+      Future(false)
     }
 
     def onClickComplete(item: Item) = {

@@ -2,3 +2,5 @@
 *.idea/
 shared-sources.iml
 scala-sources.iml
+lodo.h2.db
+lodo.trace.db

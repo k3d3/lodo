@@ -1,6 +1,7 @@
 package lodo
 
 import akka.actor.ActorSystem
+import spray.httpx.encoding.Gzip
 import spray.routing.SimpleRoutingApp
 import upickle._
 
@@ -34,7 +35,10 @@ object Server extends SimpleRoutingApp {
           else
             getFromResource("web/index-full.html")
         } ~
-        getFromResourceDirectory("web")
+        (if (devMode)
+          getFromResourceDirectory("web")
+        else
+          compressResponse() (getFromResourceDirectory("web")))
       } ~
       post {
         path("api" / Segments) { s =>

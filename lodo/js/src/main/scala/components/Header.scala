@@ -12,11 +12,11 @@ object Header {
         <.div(^.cls := "container-fluid",
           <.div(^.cls := "navbar-header",
             <.button(^.cls := "navbar-toggle collapsed", ^.tpe := "button",
-              ^.onClick --> P.b.performRedo(),
+              ^.onClick ==> P.b.performRedo(),
               <.span(^.cls := "glyphicon glyphicon-forward")
             ),
             <.button(^.cls := "navbar-toggle collapsed", ^.tpe := "button",
-              ^.onClick --> P.b.performUndo(),
+              ^.onClick ==> P.b.performUndo(),
               <.span(^.cls := "glyphicon glyphicon-backward")
             ),
             <.button(^.cls := "navbar-toggle collapsed", ^.tpe := "button",
@@ -39,9 +39,9 @@ object Header {
             <.ul(^.cls := "nav navbar-nav navbar-right",
 
               <.li(<.a(^.href := "#",
-                ^.onClick --> P.b.performUndo(), "Undo")),
+                ^.onClick ==> P.b.performUndo(), "Undo")),
               <.li(<.a(^.href := "#",
-                ^.onClick --> P.b.performRedo(), "Redo"))
+                ^.onClick ==> P.b.performRedo(), "Redo"))
             ),
           <.form(^.cls := "navbar-form navbar-right",
             <.input(^.cls := "form-control filter",

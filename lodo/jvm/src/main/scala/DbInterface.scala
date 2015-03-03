@@ -1,18 +1,37 @@
 package lodo
 
+import java.lang.RuntimeException
+
 import org.squeryl.{Schema, SessionFactory, Session}
 import org.squeryl.PrimitiveTypeMode._
-import org.squeryl.adapters.{PostgreSqlAdapter, H2Adapter}
+import org.squeryl.adapters.H2Adapter
 
 
 object DbInterface {
   import Tables._
   Class.forName("org.h2.Driver")
 
+  val devMode = System.getProperty("DEVMODE", "false").toBoolean
+
+  val connString =
+    if (devMode)
+      "jdbc:h2:lodo"
+    else
+      "jdbc:h2:lodo;TRACE_LEVEL_FILE=0"
+
   SessionFactory.concreteFactory = Some(()=>
     Session.create(
-      java.sql.DriverManager.getConnection("jdbc:h2:~/lodo"),
+      java.sql.DriverManager.getConnection(connString),
       new H2Adapter))
+
+  transaction {
+    try {
+      Tables.create
+      println("DB doesn't exist - tables created")
+    } catch {
+      case e: RuntimeException => println("DB exists - no tables created")
+    }
+  }
 
   def getItems(): ItemMap = transaction {
     new ItemMap(items.toSeq)
