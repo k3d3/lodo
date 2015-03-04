@@ -64,8 +64,7 @@ object Build extends sbt.Build {
 		.aggregate(lodoJS, lodoJVM)
 		.settings(
       publish := {},
-      publishLocal := {},
-      commands += ReleaseCmd
+      publishLocal := {}
 		)
 
   val productionBuild = settingKey[Boolean]("Build for production")
@@ -115,7 +114,7 @@ object Build extends sbt.Build {
     scalaJsOutputDir := (classDirectory in Compile).value / "web" / "js",
     NativePackagerKeys.batScriptExtraDefines += "set PRODUCTION_MODE=true",
     NativePackagerKeys.bashScriptExtraDefines += "export PRODUCTION_MODE=true",
-    // reStart depends on running fastOptJS on the JS project
+    commands += ReleaseCmd,
     Revolver.reStart <<= Revolver.reStart dependsOn (fastOptJS in(lodoJS, Compile))
   ).enablePlugins(JavaAppPackaging)
 
