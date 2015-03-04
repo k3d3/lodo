@@ -1,6 +1,9 @@
 import com.lihaoyi.workbench.Plugin._
 import com.typesafe.sbt.SbtNativePackager.autoImport._
-import NativePackagerKeys._
+import com.typesafe.sbt.SbtNativePackager._
+import sbtassembly._
+import AssemblyPlugin._
+import AssemblyKeys._
 import com.typesafe.sbt.packager.archetypes._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.Keys._
@@ -8,7 +11,7 @@ import sbt._
 import spray.revolver.RevolverPlugin._
 
 object Settings {
-  val name = "lodo"
+  val name = "Lodo"
   val version = "0.0.3"
 
   val scalacOptions = Seq(
@@ -60,11 +63,23 @@ object Settings {
 }
 
 object Build extends sbt.Build {
-	lazy val lodoRoot = project.in(file("lodo"))
+  val ReleaseCmd = Command.command("release") {
+    state => "set productionBuild in lodoJS := true" ::
+      "lodoJS/test" ::
+      "lodoJS/fullOptJS" ::
+      "lodoJS/packageJSDependencies" ::
+      "lodoJVM/test" ::
+      "stage" ::
+      state
+  }
+
+
+	lazy val root = project.in(file("."))
 		.aggregate(lodoJS, lodoJVM)
 		.settings(
       publish := {},
-      publishLocal := {}
+      publishLocal := {},
+      commands += ReleaseCmd
 		)
 
   val productionBuild = settingKey[Boolean]("Build for production")
@@ -75,7 +90,10 @@ object Build extends sbt.Build {
 			version := Settings.version,
 			scalaVersion := Settings.versions.scala,
 			scalacOptions ++= Settings.scalacOptions,
-			libraryDependencies ++= Settings.sharedDependencies.value
+			libraryDependencies ++= Settings.sharedDependencies.value,
+      maintainer in Debian := "Keith Morrow <keith@kmorrow.ca>",
+      packageSummary in Debian := "Layered Todo List Application",
+      packageDescription := "Organizes an outliner into notebooks, pages and an infinite-depth series of lists and items."
 		)
     .jsSettings(workbenchSettings: _*)
     .jsSettings(
@@ -110,21 +128,25 @@ object Build extends sbt.Build {
     }
   )
 
-  lazy val lodoJVM: Project = lodo.jvm.settings(js2jvmSettings: _*).settings(
-    scalaJsOutputDir := (classDirectory in Compile).value / "web" / "js",
-    NativePackagerKeys.batScriptExtraDefines += "set PRODUCTION_MODE=true",
-    NativePackagerKeys.bashScriptExtraDefines += "export PRODUCTION_MODE=true",
-    commands += ReleaseCmd,
-    Revolver.reStart <<= Revolver.reStart dependsOn (fastOptJS in(lodoJS, Compile))
-  ).enablePlugins(JavaAppPackaging)
-
-  val ReleaseCmd = Command.command("release") {
-    state => "set productionBuild in js := true" ::
-      "sharedProjectJS/test" ::
-      "sharedProjectJS/fullOptJS" ::
-      "sharedProjectJS/packageJSDependencies" ::
-      "test" ::
-      "stage" ::
-      state
-  }
+  lazy val lodoJVM: Project = lodo.jvm.settings(js2jvmSettings: _*)
+    .settings(assemblySettings: _*)
+    .settings(
+      scalaJsOutputDir := (classDirectory in Compile).value / "web" / "js",
+      NativePackagerKeys.batScriptExtraDefines += "set PRODUCTION_MODE=true",
+      NativePackagerKeys.bashScriptExtraDefines += "export PRODUCTION_MODE=true",
+      Revolver.reStart <<= Revolver.reStart dependsOn (fastOptJS in(lodoJS, Compile)),
+      mappings in Universal := {
+        val universalMappings = (mappings in Universal).value
+        val fatJar = (assembly in Compile).value
+        // removing means filtering
+        val filtered = universalMappings filter {
+          case (file, name) => ! name.endsWith(".jar")
+        }
+        // add the fat jar
+        filtered :+ (fatJar -> ("lib/" + fatJar.getName))
+      },
+      assemblyJarName in assembly := "lodo.jar",
+      NativePackagerKeys.scriptClasspath := Seq( (assemblyJarName in assembly).value ),
+      commands += ReleaseCmd
+  ).enablePlugins(JavaServerAppPackaging)
 }
