@@ -63,8 +63,8 @@ object Build extends sbt.Build {
 	lazy val lodoRoot = project.in(file("lodo"))
 		.aggregate(lodoJS, lodoJVM)
 		.settings(
-			publish := {},
-			publishLocal := {},
+      publish := {},
+      publishLocal := {},
       commands += ReleaseCmd
 		)
 
