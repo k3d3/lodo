@@ -1,6 +1,7 @@
 package lodo
 
 import akka.actor.ActorSystem
+import com.typesafe.config.ConfigFactory
 import spray.httpx.encoding.Gzip
 import spray.routing.SimpleRoutingApp
 import upickle._
@@ -13,6 +14,12 @@ import Helper._
 object Router extends autowire.Server[String, upickle.Reader, upickle.Writer] {
   def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
   def write[Result: upickle.Writer](r: Result) = upickle.write(r)
+}
+
+object Config {
+  val c = ConfigFactory.load().getConfig("lodo")
+
+  val productionMode = c.getBoolean("productionMode")
 }
 
 object Server extends SimpleRoutingApp {
@@ -30,10 +37,10 @@ object Server extends SimpleRoutingApp {
     startServer("0.0.0.0", port = port) {
       get {
         pathSingleSlash {
-          if (devMode)
-            getFromResource("web/index.html")
-          else
+          if (Config.productionMode)
             getFromResource("web/index-full.html")
+          else
+            getFromResource("web/index.html")
         } ~
         (if (devMode)
           getFromResourceDirectory("web")

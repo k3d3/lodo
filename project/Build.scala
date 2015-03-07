@@ -126,7 +126,7 @@ object Build extends sbt.Build {
       IO.copyFile(base, (classDirectory in Compile).value / "web" / "js" / base.getName)
       base
     }
-  )
+  ).dependsOn(uri("git://github.com/k3d3/actuarius.git"))
 
   lazy val lodoJVM: Project = lodo.jvm.settings(js2jvmSettings: _*)
     .settings(assemblySettings: _*)
