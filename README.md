@@ -45,4 +45,4 @@ the code recompile and will restart the server. It will also compile much faster
 
 # License
 
-The code contained in this repository is licensed under the MIT license.
+The code contained in this repository is licensed under the AGPLv3 license.
