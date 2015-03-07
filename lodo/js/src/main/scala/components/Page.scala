@@ -124,7 +124,9 @@ object Page {
                   ^.defaultValue := P.item.contents, ^.onChange ==> B.onEditChange)
               )
             else
-              P.item.contents
+              <.span(^.cls := "content-data",
+                ^.dangerouslySetInnerHtml(P.b.mdTransform(P.item.contents))
+              )
           ),
           BtnGroup(
             BtnGroup.Props(P.item, "page",

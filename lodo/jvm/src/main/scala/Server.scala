@@ -29,7 +29,6 @@ object Server extends SimpleRoutingApp {
     implicit val system = ActorSystem("Main")
     implicit val context = system.dispatcher
 
-    val devMode = System.getProperty("DEVMODE", "false").toBoolean
     val port = Properties.envOrElse("PORT", "5000").toInt
 
     val apiService = new ApiService(system)
@@ -42,7 +41,7 @@ object Server extends SimpleRoutingApp {
           else
             getFromResource("web/index.html")
         } ~
-        (if (devMode)
+        (if (Config.productionMode)
           getFromResourceDirectory("web")
         else
           compressResponse() (getFromResourceDirectory("web")))

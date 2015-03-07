@@ -4,7 +4,6 @@ import java.util.UUID
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
-import eu.henkelmann.actuarius.ActuariusTransformer
 
 import Helper._
 
@@ -16,14 +15,6 @@ object LodoList {
                    isDragging: Boolean = false, isDragOver: Boolean = false)
 
   class Backend(t: BackendScope[Props, State]) {
-    val mdTransformer = new ActuariusTransformer()
-    def mdTransform(input: String): String = {
-      // Ensure URLs are converted to links
-      mdTransformer(
-        input.replaceAll("(\\A|\\s|^)((http|https|ftp|mailto):\\S+)(\\s|\\z|$)", "$1[$2]($2)$4")
-      ).toString
-    }
-
     def onClickEdit(item: Item) =
       t.modState(s => {
         if (s.isEditing)
@@ -125,8 +116,8 @@ object LodoList {
                   ^.defaultValue := P.item.contents, ^.onChange ==> B.onEditChange)
               )
             else
-            <.span(
-              ^.dangerouslySetInnerHtml(B.mdTransform(P.item.contents))
+            <.span(^.cls := "content-data",
+              ^.dangerouslySetInnerHtml(P.b.mdTransform(P.item.contents))
             )
           ),
           BtnGroup(

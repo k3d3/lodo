@@ -49,12 +49,11 @@ object NotebookSelector {
     def onDrop(e: ReactDragEvent): Unit = {
       e.stopPropagation()
       e.preventDefault()
+      t.modState(_.copy(isDragOver = false))
 
       val src = UUID.fromString(e.dataTransfer.getData("lodo"))
 
       val item = t.props.itemMap(Some(src))
-
-      t.modState(_.copy(isDragOver = false))
 
       item.map(item => {
         t.props.b.moveAndSelectNotebook(MoveOp(item, None), item.id)

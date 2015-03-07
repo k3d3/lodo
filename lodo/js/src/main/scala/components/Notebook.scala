@@ -110,7 +110,7 @@ object Notebook {
                   ^.defaultValue := P.item.contents, ^.onChange ==> B.onEdit)
               )
             else
-              P.item.contents
+              <.span(^.cls := "content-data", P.item.contents)
           ),
           BtnGroup(
             BtnGroup.Props(P.item, "page",

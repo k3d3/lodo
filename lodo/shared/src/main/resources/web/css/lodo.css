@@ -205,7 +205,7 @@ a [draggable=true] {
 }
 
 /* Markdown stuff */
-.content p, .content h1, .content h2,
-.content h3, .content h4, .content h5, .content h6 {
+.content-data p, .content-data h1, .content-data h2,
+.content-data h3, .content-data h4, .content-data h5, .content-data h6 {
     display: inline;
 }

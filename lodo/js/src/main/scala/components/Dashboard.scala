@@ -2,6 +2,7 @@ package lodo
 
 import java.util.UUID
 
+import eu.henkelmann.actuarius.ActuariusTransformer
 import japgolly.scalajs.react.extra.OnUnmount
 import japgolly.scalajs.react.{ReactMouseEventH, ReactEvent, BackendScope, ReactComponentB}
 import japgolly.scalajs.react.vdom.prefix_<^._
@@ -86,6 +87,7 @@ object Dashboard {
     def moveAndSelectNotebook(op: MoveOp, itemId: UUID) =
       t.modState { s =>
         val newItemMap = s.itemMap(op)
+        Client[LodoApi].applyOperation(op).call()
         newItemMap
           .getNotebook(itemId)
           .fold(s.copy(itemMap = newItemMap)) { n =>
@@ -160,6 +162,14 @@ object Dashboard {
         Client[LodoApi].applyOperation(op).call()
         s.copy(itemMap = s.itemMap(op))
       })
+    }
+
+    val mdTransformer = new ActuariusTransformer()
+    def mdTransform(input: String): String = {
+      // Ensure URLs are converted to links
+      mdTransformer(
+        input.replaceAll("(\\A|\\s|^)((http|https):\\S+)(\\s|\\z|$)", "$1[$2]($2)$4")
+      ).toString
     }
   }
 
