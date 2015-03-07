@@ -1,3 +1,20 @@
+/*
+Lodo is a layered to-do list (Outliner)
+Copyright (C) 2015 Keith Morrow.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License v3 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package lodo
 
 import java.util.UUID
@@ -84,3 +101,45 @@ case class DuplicateOp(item: Item, newId: UUID, newParent: Option[UUID]) extends
 sealed trait OpType
 case class OpApply(op: Op) extends OpType
 case class OpUndo(op: Op) extends OpType
+
+/*
+* What is needed for client-side encryption?
+*
+* Server side:
+* - Encrypted data associated with unencrypted ID
+*   - Could this just be a tuple of UUID and EncryptedData?
+* - Simple operations that can be performed on encrypted data
+*   - AddOp
+*     - Contains new unencrypted UUID and new encrypted data
+*     - To reverse, delete data associated with ID
+*   - ReplaceOp
+*     - Contains existing unencrypted UUID and new encrypted data
+*     - To reverse, keep track of old data, and replace new with old
+*   - DeleteOp
+*     - Contains existing unencrypted UUID
+*     - To reverse, keep track of old data, and add old data
+*
+* Client side:
+* - Encrypted data associated with unencrypted ID (just for communications)
+*   - Decrypted ID and data (which could just be an Item)
+*
+* With encrypted data, and undo being tracked by the simple operations rather than the complicated operations,
+* do the complex operations need to exist anymore? They'll never be applied to the itemMap with encryption.
+* They can however be useful to convert complicated operations into simple operations.
+**/
+
+case class CryptItem(iv: Array[Byte], data: Array[Byte]) {
+  def toItem(id: UUID, key: Array[Byte]): Item = {
+    Item(id, None, 0, "")
+  }
+}
+
+case class CryptItemMap(items: Map[UUID,CryptItem]) {
+  def apply(op: CryptOp): CryptItemMap = ???
+  def applyWithUndo(op: CryptOp): (CryptItemMap, CryptOp) = ???
+
+  def toItemMap(key: Array[Byte]): ItemMap = ???
+}
+
+sealed trait CryptOp
+case class CryptAddOp(id: UUID, data: CryptItem)

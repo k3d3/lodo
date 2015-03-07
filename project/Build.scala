@@ -1,3 +1,20 @@
+/*
+Lodo is a layered to-do list (Outliner)
+Copyright (C) 2015 Keith Morrow.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License v3 as
+published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 import com.lihaoyi.workbench.Plugin._
 import com.typesafe.sbt.SbtNativePackager.autoImport._
 import com.typesafe.sbt.SbtNativePackager._
@@ -138,7 +155,7 @@ object Build extends sbt.Build {
       mappings in Universal := {
         val universalMappings = (mappings in Universal).value
         val fatJar = (assembly in Compile).value
-        // removing means filtering
+
         val filtered = universalMappings filter {
           case (file, name) => ! name.endsWith(".jar")
         }

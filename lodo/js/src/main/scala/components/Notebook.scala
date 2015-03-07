@@ -33,7 +33,9 @@ object Notebook {
       e.currentTarget.select()
 
     def onSubmit(item: Item)(e: ReactEvent) = {
+      e.stopPropagation()
       e.preventDefault()
+
       t.modState(s => {
         t.props.b.applyOperation(EditOp(item, s.editText))
         s.copy(isEditing = false)
@@ -41,26 +43,40 @@ object Notebook {
     }
 
     def onDragStart(e: ReactDragEvent) = {
+      e.stopPropagation()
+      e.preventDefault()
+
       e.dataTransfer.effectAllowed = "move"
       e.dataTransfer.setData("lodo", t.props.item.id.toString)
       t.modState(_.copy(isDragging = true, isDragOver = false))
     }
 
-    def onDragEnd(e: ReactDragEvent) =
+    def onDragEnd(e: ReactDragEvent) = {
+      e.stopPropagation()
+      e.preventDefault()
+
       t.modState(_.copy(isDragging = false, isDragOver = false))
+    }
 
     def onDragEnter(e: ReactDragEvent) = {
+      e.stopPropagation()
+      e.preventDefault()
+
       t.modState(_.copy(isDragOver = true, isDragging = false))
       t.props.b.selectNotebook(t.props.item)
     }
 
-    def onDragLeave(e: ReactDragEvent) =
-      t.modState(_.copy(isDragOver = false, isDragging = false))
-
-    def onDragOver(e: ReactDragEvent) = {
-      t.modState(_.copy(isDragOver = true))
+    def onDragLeave(e: ReactDragEvent) = {
       e.stopPropagation()
       e.preventDefault()
+
+      t.modState(_.copy(isDragOver = false, isDragging = false))
+    }
+
+    def onDragOver(e: ReactDragEvent) = {
+      e.stopPropagation()
+      e.preventDefault()
+      //t.modState(_.copy(isDragOver = true))
     }
 
     def onDrop(e: ReactDragEvent): Unit = {
