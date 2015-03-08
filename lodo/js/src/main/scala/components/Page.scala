@@ -163,7 +163,7 @@ object Page {
                 ("col-sm-4", !P.isSidebarShown)
               ),
                 iL.map{ case (c, i) =>
-                  LodoList(LodoList.Props(P.b, P.itemMap, c, i))
+                  LodoList(LodoList.Props(P.b, P.itemMap, c, i, ListColor.root))
                 }
               )
             }),

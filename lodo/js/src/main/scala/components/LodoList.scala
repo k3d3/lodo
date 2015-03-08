@@ -25,7 +25,8 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 import Helper._
 
 object LodoList {
-  case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int)
+  case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int,
+                   listColor: ListColor)
 
   case class State(isAdding: Boolean = false,isEditing: Boolean = false,
                    addText: String = "", editText: String,
@@ -110,7 +111,7 @@ object LodoList {
     .backend(new Backend(_))
     .render((P, S, B) => {
       val children = P.itemMap.children(P.item.id)
-      <.div(^.cls := "panel panel-default item",
+      <.div(^.cls := "panel item",
         <.div(^.cls := (if (children.nonEmpty || S.isAdding) "panel-heading" else "panel-body"),
           ^.classSet(
             ("panel-heading", children.nonEmpty || S.isAdding),
@@ -147,10 +148,11 @@ object LodoList {
           )
         ),
         (children.nonEmpty || S.isAdding) ?= <.div(^.cls := "panel-body",
+          ^.backgroundColor := P.listColor.hslString,
           children.nonEmpty ?= children
             .zipWithIndex
             .map { case (c, i) =>
-              LodoList(LodoList.Props(P.b, P.itemMap, c, i))
+              LodoList(LodoList.Props(P.b, P.itemMap, c, i, P.listColor.next()))
             },
           S.isAdding ?= <.div(
             <.form(^.onSubmit ==> B.onAddSubmit,

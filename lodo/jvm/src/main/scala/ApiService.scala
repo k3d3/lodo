@@ -114,7 +114,7 @@ class ApiService(val system: ActorSystem) extends LodoApi {
   override def getChanges(lastOp: Int, sessId: UUID): Option[List[OpType]] = {
     if (sessId != this.sessId)
       None // Restart the client
-    if (State.lastOps.waitForNewOp(lastOp)) {
+    else if (State.lastOps.waitForNewOp(lastOp)) {
       val promise = Promise[OpType]()
       val listener = system.actorOf(Props(new Actor {
         def receive = {

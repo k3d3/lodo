@@ -12,16 +12,18 @@ body {
     color: #000;
 }
 .panel-heading {
-    padding: 5px 10px;
-}
-.panel-body {
     padding: 5px;
 }
+.panel-body {
+    padding: 2px;
+    padding-left: 10px;
+}
+
 .panel-title {
     font-size: 12px;
 }
 .panel.item {
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 .panel.item-list {
     padding: 5px;
