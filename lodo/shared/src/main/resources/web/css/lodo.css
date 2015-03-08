@@ -12,8 +12,13 @@ body {
     margin-right: -1px;
 }
 .panel > .panel-heading {
+    color: #333;
+}
+
+.panel > .panel-heading:hover {
     color: #000;
 }
+
 .panel-heading {
     padding: 2px 0px 2px 5px;
     margin-right: 0px;
