@@ -5,6 +5,8 @@ import java.util.UUID
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 
+import Helper._
+
 object Notebook {
   case class Props(b: Dashboard.Backend, selectedNotebook: Option[UUID],
                    isAdding: Boolean, itemMap: ItemMap, item: Item, index: Int)
@@ -44,7 +46,6 @@ object Notebook {
 
     def onDragStart(e: ReactDragEvent) = {
       e.stopPropagation()
-      e.preventDefault()
 
       e.dataTransfer.effectAllowed = "move"
       e.dataTransfer.setData("lodo", t.props.item.id.toString)
@@ -53,14 +54,13 @@ object Notebook {
 
     def onDragEnd(e: ReactDragEvent) = {
       e.stopPropagation()
-      e.preventDefault()
 
       t.modState(_.copy(isDragging = false, isDragOver = false))
     }
 
     def onDragEnter(e: ReactDragEvent) = {
       e.stopPropagation()
-      e.preventDefault()
+      //e.preventDefault()
 
       t.modState(_.copy(isDragOver = true, isDragging = false))
       t.props.b.selectNotebook(t.props.item)
@@ -68,7 +68,7 @@ object Notebook {
 
     def onDragLeave(e: ReactDragEvent) = {
       e.stopPropagation()
-      e.preventDefault()
+      //e.preventDefault()
 
       t.modState(_.copy(isDragOver = false, isDragging = false))
     }
@@ -76,7 +76,7 @@ object Notebook {
     def onDragOver(e: ReactDragEvent) = {
       e.stopPropagation()
       e.preventDefault()
-      //t.modState(_.copy(isDragOver = true))
+      t.modState(_.copy(isDragOver = true))
     }
 
     def onDrop(e: ReactDragEvent): Unit = {
@@ -91,7 +91,7 @@ object Notebook {
         return // Don't allow drop on self or child
 
       t.props.itemMap(Some(src)).map(item => {
-        val op = MoveOp(item, Some(dst))
+        val op = MoveOp(item, Some(dst), time())
         if (t.props.selectedNotebook == Some(src))
           t.props.b.moveAndSelectNotebook(op, dst)
         else
@@ -115,7 +115,8 @@ object Notebook {
           ("dragging", S.isDragging),
           ("dragover", S.isDragOver)
         ),
-        <.a(^.href := "#", ^.onClick --> P.b.selectNotebook(P.item),
+        <.a(^.href := "#",
+          ^.onClick --> P.b.selectNotebook(P.item),
           ^.onDragStart ==> B.onDragStart,
           ^.onDragEnd ==> B.onDragEnd,
           <.span(^.cls := "sel-num", P.index),

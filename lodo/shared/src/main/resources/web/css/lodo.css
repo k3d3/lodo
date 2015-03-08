@@ -27,14 +27,32 @@ body {
 .panel.item-list > .panel-body {
     margin-left: 10px;
     padding-left: 0px;
+    border-left: 1px solid #999;
+}
+
+.panel.item-list > .panel-body:hover {
     border-left: 1px solid #000;
+}
+
+.panel-body:not(:hover) > .btn-group {
+    display: none;
+}
+.panel-heading:not(:hover) > .btn-group {
+    display: none;
+}
+a:not(:hover) > .btn-group {
+    display: none;
 }
 
 .panel-title {
     font-size: 12px;
 }
 .panel.item, .panel.item-list {
-    margin-bottom: 2px;
+    margin-bottom: -1px;
+}
+
+.panel.page {
+    margin-bottom: 20px;
 }
 
 .navbar-header > button {
@@ -125,9 +143,25 @@ body {
     width: 15px;
     height: 15px;
     font-size: 10px;
+    cursor: pointer;
 }
-.sel-num:hover {
-    background-color: #ddd;
+
+.foldstatus {
+    display: none;
+}
+
+.panel-heading:hover > .sel-num > .foldstatus {
+    display: block;
+}
+.panel-heading:hover > .sel-num > .notfoldstatus {
+    display: none;
+}
+
+.panel-body:hover > .sel-num > .foldstatus {
+    display: block;
+}
+.panel-body:hover > .sel-num > .notfoldstatus {
+    display: none;
 }
 
 .page-buttons {

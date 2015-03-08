@@ -29,7 +29,8 @@ object Page {
 
   case class State(isAdding: Boolean = false, isEditing: Boolean = false,
                    addText: String = "", editText: String,
-                   isDragging: Boolean = false, isDragOver: Boolean = false)
+                   isDragging: Boolean = false, isDragOver: Boolean = false,
+                   isFolded: Boolean = false)
 
   class Backend(t: BackendScope[Props, State]) {
     def onClickEdit(item: Item) =
@@ -102,8 +103,15 @@ object Page {
         return // Don't allow drop on self or child
 
       t.props.itemMap(Some(src)).map(item => {
-        t.props.b.applyOperation(MoveOp(item, Some(dst)))
+        t.props.b.applyOperation(MoveOp(item, Some(dst), time()))
       })
+    }
+
+    def toggleFold(e: ReactMouseEvent): Unit = {
+      e.stopPropagation()
+      e.preventDefault()
+
+      t.modState(s => s.copy(isFolded = !s.isFolded))
     }
   }
 
@@ -133,7 +141,7 @@ object Page {
           ^.draggable := !S.isEditing,
           ^.onDragStart ==> B.onDragStart,
           ^.onDragEnd ==> B.onDragEnd,
-          <.span(^.cls := "sel-num", P.index),
+          SelNum(SelNum.Props(P.index, S.isFolded, B.toggleFold)),
           <.span(^.cls := "content",
             if (S.isEditing)
               <.form(^.onSubmit ==> B.onEditSubmit(P.item),
@@ -155,7 +163,7 @@ object Page {
           )
         ),
         (children.nonEmpty || S.isAdding) ?= <.div(^.cls := "panel-body",
-          children.nonEmpty ?=
+          (children.nonEmpty && !S.isFolded) ?=
             columnize(children.zipWithIndex, if (P.isSidebarShown) 2 else 3)
             .map(iL => {
               <.div(^.classSet(
@@ -163,7 +171,7 @@ object Page {
                 ("col-sm-4", !P.isSidebarShown)
               ),
                 iL.map{ case (c, i) =>
-                  LodoList(LodoList.Props(P.b, P.itemMap, c, i, ListColor.root))
+                  LodoList(LodoList.Props(P.b, P.itemMap, c, i))
                 }
               )
             }),

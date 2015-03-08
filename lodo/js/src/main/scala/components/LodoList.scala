@@ -25,12 +25,12 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 import Helper._
 
 object LodoList {
-  case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int,
-                   listColor: ListColor)
+  case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int)
 
   case class State(isAdding: Boolean = false,isEditing: Boolean = false,
                    addText: String = "", editText: String,
-                   isDragging: Boolean = false, isDragOver: Boolean = false)
+                   isDragging: Boolean = false, isDragOver: Boolean = false,
+                   isFolded: Boolean = false)
 
   class Backend(t: BackendScope[Props, State]) {
     def onClickEdit(item: Item) =
@@ -101,8 +101,15 @@ object LodoList {
         return // Don't allow drop on self or child
 
       t.props.itemMap(Some(src)).map(item => {
-        t.props.b.applyOperation(MoveOp(item, Some(dst)))
+        t.props.b.applyOperation(MoveOp(item, Some(dst), time()))
       })
+    }
+
+    def toggleFold(e: ReactMouseEvent): Unit = {
+      e.stopPropagation()
+      e.preventDefault()
+
+      t.modState(s => s.copy(isFolded = !s.isFolded))
     }
   }
 
@@ -117,7 +124,6 @@ object LodoList {
           ("item-list", children.nonEmpty)
         ),
         <.div(^.cls := (if (children.nonEmpty || S.isAdding) "panel-heading" else "panel-body"),
-          //^.backgroundColor := P.listColor.hslString,
           ^.classSet(
             ("panel-heading", children.nonEmpty || S.isAdding),
             ("panel-body", !(children.nonEmpty || S.isAdding)),
@@ -131,7 +137,7 @@ object LodoList {
           ^.onDrop ==> B.onDrop,
           ^.onDragStart ==> B.onDragStart,
           ^.onDragEnd ==> B.onDragEnd,
-          <.span(^.cls := "sel-num", P.index),
+          SelNum(SelNum.Props(P.index, S.isFolded, B.toggleFold)),
           <.span(^.cls := "content",
             if (S.isEditing)
               <.form(^.onSubmit ==> B.onEditSubmit(P.item),
@@ -153,11 +159,10 @@ object LodoList {
           )
         ),
         (children.nonEmpty || S.isAdding) ?= <.div(^.cls := "panel-body",
-          //^.backgroundColor := P.listColor.hslString,
-          children.nonEmpty ?= children
+          (children.nonEmpty && !S.isFolded) ?= children
             .zipWithIndex
             .map { case (c, i) =>
-              LodoList(LodoList.Props(P.b, P.itemMap, c, i, P.listColor.next()))
+              LodoList(LodoList.Props(P.b, P.itemMap, c, i))
             },
           S.isAdding ?= <.div(
             <.form(^.onSubmit ==> B.onAddSubmit,

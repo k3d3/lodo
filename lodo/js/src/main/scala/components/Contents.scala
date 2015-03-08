@@ -51,8 +51,14 @@ object Contents {
         return // Don't allow drop on self
 
       t.props.itemMap(Some(src)).map(item => {
-        t.props.b.applyOperation(MoveOp(item, dst))
+        t.props.b.applyOperation(MoveOp(item, dst, time()))
       })
+    }
+
+    def onClickAdd(e: ReactMouseEvent): Unit = {
+      t.props.itemMap(t.props.selectedNotebook).foreach { item =>
+        t.props.b.onNotebookClickAdd(item)
+      }
     }
   }
 
@@ -78,14 +84,20 @@ object Contents {
             .zipWithIndex
             .map{ case (p, i) => Page(Page.Props(P.b, P.itemMap, p, i, P.isSidebarShown)) }
         ),
-        P.isAdding ?= <.div(
-          <.a(^.href := "#",
-            <.form(^.onSubmit ==> B.onAddSubmit,
-              <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
-                ^.onChange ==> B.onAddChange)
+        if (P.isAdding)
+          <.div(
+            <.a(^.href := "#",
+              <.form(^.onSubmit ==> B.onAddSubmit,
+                <.input(^.onFocus ==> B.onFocus, ^.autoFocus := true,
+                  ^.onChange ==> B.onAddChange)
+              )
             )
           )
-        )
+        else
+          (P.selectedNotebook != None) ?= <.div(^.cls := "btn btn-default",
+            ^.onClick ==> B.onClickAdd,
+            "Add new page"
+          )
       )
     }).build
 

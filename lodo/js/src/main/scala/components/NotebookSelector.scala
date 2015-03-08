@@ -81,7 +81,7 @@ object NotebookSelector {
       val item = t.props.itemMap(Some(src))
 
       item.map(item => {
-        t.props.b.moveAndSelectNotebook(MoveOp(item, None), item.id)
+        t.props.b.moveAndSelectNotebook(MoveOp(item, None, time()), item.id)
       })
     }
   }
@@ -112,12 +112,13 @@ object NotebookSelector {
             ^.onDragLeave ==> B.onDragLeave,
             ^.onDragOver ==> B.onDragOver,
             ^.onDrop ==> B.onDrop,
-              <.a(^.href := "#", ^.onClick --> B.onClickAdd(),
-                <.span(^.cls := "glyphicon glyphicon-plus"),
-                <.span(^.classSet(("draghidden", !S.isDragOver)),
-                  " Create notebook from item"
-                )
+            ^.title := "Create new notebook",
+            <.a(^.href := "#", ^.onClick --> B.onClickAdd(),
+              <.span(^.cls := "glyphicon glyphicon-plus"),
+              <.span(^.classSet(("draghidden", !S.isDragOver)),
+                " Create notebook from item"
               )
+            )
           )
       )
     )
