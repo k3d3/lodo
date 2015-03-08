@@ -6,29 +6,37 @@ body {
     border: 0;
 }
 .panel {
-    border: 1px solid #000;
+    /*border: 1px solid #000;*/
+    border-radius: 0px;
+    box-shadow: none;
+    margin-right: -1px;
 }
 .panel > .panel-heading {
     color: #000;
 }
 .panel-heading {
     padding: 5px;
+    padding-right: 0px;
+    margin-right: 0px;
 }
 .panel-body {
-    padding: 2px;
-    padding-left: 10px;
+    padding: 2px 0px 2px 10px;
+    margin-right: 0px;
+}
+
+.panel.item-list > .panel-body {
+    margin-left: 10px;
+    padding-left: 0px;
+    border-left: 1px solid #000;
 }
 
 .panel-title {
     font-size: 12px;
 }
-.panel.item {
+.panel.item, .panel.item-list {
     margin-bottom: 2px;
 }
-.panel.item-list {
-    padding: 5px;
-    margin-top: 0px;
-}
+
 .navbar-header > button {
     padding: 9px 13px;
 }
@@ -123,17 +131,14 @@ body {
 }
 
 .page-buttons {
-    margin-top: -1px;
-    margin-right: -6px;
+    margin-top: -2px;
+    margin-right: 2px;
 }
 
 .page-buttons > .btn-sm {
     padding: 2px 5px;
 }
 
-.item-buttons {
-
-}
 .item-buttons > .btn-sm {
     padding: 2px 5px;
     font-size: 9px;

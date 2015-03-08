@@ -111,8 +111,13 @@ object LodoList {
     .backend(new Backend(_))
     .render((P, S, B) => {
       val children = P.itemMap.children(P.item.id)
-      <.div(^.cls := "panel item",
+      <.div(
+        ^.classSet1("panel",
+          ("item", children.isEmpty),
+          ("item-list", children.nonEmpty)
+        ),
         <.div(^.cls := (if (children.nonEmpty || S.isAdding) "panel-heading" else "panel-body"),
+          //^.backgroundColor := P.listColor.hslString,
           ^.classSet(
             ("panel-heading", children.nonEmpty || S.isAdding),
             ("panel-body", !(children.nonEmpty || S.isAdding)),
@@ -148,7 +153,7 @@ object LodoList {
           )
         ),
         (children.nonEmpty || S.isAdding) ?= <.div(^.cls := "panel-body",
-          ^.backgroundColor := P.listColor.hslString,
+          //^.backgroundColor := P.listColor.hslString,
           children.nonEmpty ?= children
             .zipWithIndex
             .map { case (c, i) =>
