@@ -39,7 +39,8 @@ object Settings {
   )
   /** Set some basic options when running the project with Revolver */
   val jvmRuntimeOptions = Seq(
-    "-Xmx1G"
+    "-Xmx1G",
+    "-DDEVMODE=true"
   )
   /** Declare global dependency versions here to avoid mismatches in multi part dependencies */
   object versions {
@@ -81,11 +82,9 @@ object Settings {
 
 object Build extends sbt.Build {
   val ReleaseCmd = Command.command("release") {
-    state => "set productionBuild in lodoJS := true" ::
-      "lodoJS/test" ::
+    state =>
       "lodoJS/fullOptJS" ::
       "lodoJS/packageJSDependencies" ::
-      "lodoJVM/test" ::
       "stage" ::
       state
   }

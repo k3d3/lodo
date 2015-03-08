@@ -33,12 +33,6 @@ object Router extends autowire.Server[String, upickle.Reader, upickle.Writer] {
   def write[Result: upickle.Writer](r: Result) = upickle.write(r)
 }
 
-object Config {
-  val c = ConfigFactory.load().getConfig("lodo")
-
-  val productionMode = c.getBoolean("productionMode")
-}
-
 object Server extends SimpleRoutingApp {
   def main(args: Array[String]): Unit = {
 
@@ -48,17 +42,19 @@ object Server extends SimpleRoutingApp {
 
     val port = Properties.envOrElse("PORT", "5000").toInt
 
+    val devMode = System.getProperty("DEVMODE", "false").toBoolean
+
     val apiService = new ApiService(system)
 
     startServer("0.0.0.0", port = port) {
       get {
         pathSingleSlash {
-          if (Config.productionMode)
-            getFromResource("web/index-full.html")
-          else
+          if (devMode)
             getFromResource("web/index.html")
+          else
+            getFromResource("web/index-full.html")
         } ~
-        (if (Config.productionMode)
+        (if (devMode)
           getFromResourceDirectory("web")
         else
           compressResponse() (getFromResourceDirectory("web")))
