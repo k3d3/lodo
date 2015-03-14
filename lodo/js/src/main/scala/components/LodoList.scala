@@ -24,6 +24,8 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 
 import Helper._
 
+import scala.scalajs.js
+
 object LodoList {
   case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int)
 
@@ -162,7 +164,7 @@ object LodoList {
           (children.nonEmpty && !S.isFolded) ?= children
             .zipWithIndex
             .map { case (c, i) =>
-              LodoList(LodoList.Props(P.b, P.itemMap, c, i))
+              LodoList(c.id.toString, LodoList.Props(P.b, P.itemMap, c, i))
             },
           S.isAdding ?= <.div(
             <.form(^.onSubmit ==> B.onAddSubmit,
@@ -174,5 +176,5 @@ object LodoList {
       )
     }).build
 
-  def apply(props: Props): TagMod = list(props)
+  def apply(key: String, props: Props): TagMod = list.withKey(key)(props)
 }
