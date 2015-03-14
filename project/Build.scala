@@ -61,7 +61,8 @@ object Settings {
     "io.spray" %% "spray-routing" % "1.3.2",
     "com.typesafe.akka" %% "akka-actor" % "2.3.6",
     "org.squeryl" %% "squeryl" % "0.9.5-7",
-    "com.h2database" % "h2" % "1.2.127"
+    "com.h2database" % "h2" % "1.2.127",
+    "org.flywaydb" % "flyway-core" % "3.1"
   ))
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
   val scalajsDependencies = Def.setting(Seq(
@@ -87,13 +88,23 @@ object Build extends sbt.Build {
       state
   }
 
+  val RunProdCmd = Command.command("run-prod") {
+    state =>
+      "lodoJS/fullOptJS" ::
+      "lodoJS/packageJSDependencies" ::
+      "lodoJVM/run" ::
+      state
+  }
 
 	lazy val root = project.in(file("."))
 		.aggregate(lodoJS, lodoJVM)
 		.settings(
       publish := {},
       publishLocal := {},
-      commands += ReleaseCmd
+      commands ++= Seq(
+        ReleaseCmd,
+        RunProdCmd
+      )
 		)
 
   val productionBuild = settingKey[Boolean]("Build for production")
