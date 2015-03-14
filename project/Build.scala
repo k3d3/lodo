@@ -29,7 +29,7 @@ import spray.revolver.RevolverPlugin._
 
 object Settings {
   val name = "Lodo"
-  val version = "0.0.3"
+  val version = "0.0.4"
 
   val scalacOptions = Seq(
     "-Xlint",
@@ -53,8 +53,7 @@ object Settings {
    */
   val sharedDependencies = Def.setting(Seq(
     "com.lihaoyi" %%% "autowire" % "0.2.4",
-    "com.lihaoyi" %%% "upickle" % "0.2.6",
-    "org.webjars" % "bootstrap" % "3.3.2" % Compile
+    "com.lihaoyi" %%% "upickle" % "0.2.6"
   ))
   /** Dependencies only used by the JVM project */
   val jvmDependencies = Def.setting(Seq(
@@ -67,8 +66,7 @@ object Settings {
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */
   val scalajsDependencies = Def.setting(Seq(
     "com.github.japgolly.scalajs-react" %%% "core" % versions.scalajsReact,
-    "com.github.japgolly.scalajs-react" %%% "extra" % versions.scalajsReact,
-    "com.lihaoyi" %%% "utest" % "0.3.0"
+    "com.github.japgolly.scalajs-react" %%% "extra" % versions.scalajsReact
   ))
   /** Dependencies for external JS libs that are bundled into a single .js file according to dependency order */
   val jsDependencies = Def.setting(Seq(

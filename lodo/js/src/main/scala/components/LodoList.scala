@@ -64,7 +64,7 @@ object LodoList {
       e.preventDefault()
       t.modState(s => {
         t.props.b.applyOperation(AddOp(Item(UUID.randomUUID, Some(t.props.item.id), time(), s.addText)))
-        s.copy(isAdding = false, addText = "")
+        s.copy(addText = "")
       })
     }
 
