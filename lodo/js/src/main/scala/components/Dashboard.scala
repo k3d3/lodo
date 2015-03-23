@@ -20,6 +20,7 @@ object Dashboard {
                    selectedNotebook: Option[UUID] = None,
                    isAdding: Boolean = false,
                    isSidebarShown: Boolean = false,
+                   isCompleteHidden: Boolean = false,
                    lastOp: Int = 0, sessId: UUID = new UUID(0, 0))
   // Note that isSidebarShown is actually inverted for non-mobile
 
@@ -72,11 +73,11 @@ object Dashboard {
         updateHandles = List()
         updateHandles :+ dom.setTimeout(() => checkForUpdates(), 0)
       })
-      call.onFailure({ case _ => {
+      call.onFailure({ case _ =>
         updateHandles.foreach(dom.clearTimeout)
         updateHandles = List()
         updateHandles :+ dom.setTimeout(() => checkForUpdates(), 1000)
-      }})
+      })
     }
 
     def selectNotebook(item: Item) =
@@ -100,6 +101,10 @@ object Dashboard {
 
     def toggleShowSidebar() = {
       t.modState(s => s.copy(isSidebarShown = !s.isSidebarShown))
+    }
+
+    def toggleCompleted() = {
+      t.modState(s => s.copy(isCompleteHidden = !s.isCompleteHidden))
     }
 
     def performUndo()(e: ReactEvent): Future[Boolean] = Future {
@@ -196,8 +201,8 @@ object Dashboard {
       val appLinks = MainRouter.appLinks(router)
       <.div(
         Header(Header.Props(B)),
-        Sidebar(Sidebar.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, S.isSidebarShown)),
-        Contents(Contents.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, !S.isSidebarShown))
+        Sidebar(Sidebar.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, S.isSidebarShown, S.isCompleteHidden)),
+        Contents(Contents.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, !S.isSidebarShown, S.isCompleteHidden))
       )
     }).build
 }

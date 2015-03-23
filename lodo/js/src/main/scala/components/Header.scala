@@ -26,15 +26,24 @@ object Header {
               ^.onClick --> P.b.toggleShowSidebar(),
               <.span(^.cls := "glyphicon glyphicon-book")
             ),
+            <.button(^.cls := "navbar-toggle collapsed", ^.tpe := "button",
+              ^.onClick --> P.b.toggleCompleted(),
+              <.span(^.cls := "glyphicon glyphicon-ok-circle")
+            ),
             <.span(^.cls := "navbar-brand",
               <.span(^.cls := "glyphicon glyphicon-check"),
               "Lodo"
             )
           ),
           <.div(^.cls := "navbar-collapse collapse",
+            <.p(^.cls := "navbar-text", "Toggle:"),
             <.ul(^.cls := "nav navbar-nav",
               <.li(<.a(^.href := "#",
-                ^.onClick --> P.b.toggleShowSidebar(), "Toggle Notebooks"))
+                ^.onClick --> P.b.toggleShowSidebar(), "Notebooks")
+              ),
+              <.li(<.a(^.href := "#",
+                ^.onClick --> P.b.toggleCompleted(), "Completed")
+              )
             ),
             <.ul(^.cls := "nav navbar-nav navbar-right",
 

@@ -27,7 +27,7 @@ import Helper._
 object NotebookSelector {
   case class Props(b: Dashboard.Backend, itemMap: ItemMap,
                    selectedNotebook: Option[UUID],
-                   isAdding: Boolean)
+                   isAdding: Boolean, isCompleteHidden: Boolean)
 
   case class State(isNotebookAdding: Boolean = false,
                    addText: String = "",
@@ -94,7 +94,8 @@ object NotebookSelector {
         P.itemMap.notebooks()
           .zipWithIndex
           .map { case (c, i) =>
-            Notebook(Notebook.Props(P.b, P.selectedNotebook, P.isAdding, P.itemMap, c, i))
+            !(P.isCompleteHidden && c.completed) ?=
+              Notebook(Notebook.Props(P.b, P.selectedNotebook, P.isAdding, P.itemMap, c, i))
           },
         if (S.isNotebookAdding)
           <.li(

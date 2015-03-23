@@ -28,7 +28,7 @@ import scala.scalajs.js
 
 object LodoList {
   case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int,
-                   parentComplete: Boolean)
+                   parentComplete: Boolean, isCompleteHidden: Boolean)
 
   case class State(isAdding: Boolean = false,isEditing: Boolean = false,
                    addText: String = "", editText: String,
@@ -167,9 +167,10 @@ object LodoList {
           (children.nonEmpty && !P.item.folded) ?= children
             .zipWithIndex
             .map { case (c, i) =>
-              LodoList(c.id.toString,
-                LodoList.Props(P.b, P.itemMap, c, i, P.parentComplete || c.completed)
-              )
+              !(P.isCompleteHidden && c.completed) ?=
+                LodoList(c.id.toString,
+                  LodoList.Props(P.b, P.itemMap, c, i, P.parentComplete || c.completed, P.isCompleteHidden)
+                )
             },
           S.isAdding ?= <.div(
             <.form(^.onSubmit ==> B.onAddSubmit,

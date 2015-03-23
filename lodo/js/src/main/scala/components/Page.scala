@@ -26,7 +26,7 @@ import Helper._
 object Page {
   case class Props(b: Dashboard.Backend, itemMap: ItemMap,
                    item: Item, index: Int, isSidebarShown: Boolean,
-                   parentComplete: Boolean)
+                   parentComplete: Boolean, isCompleteHidden: Boolean)
 
   case class State(isAdding: Boolean = false, isEditing: Boolean = false,
                    addText: String = "", editText: String,
@@ -174,9 +174,10 @@ object Page {
                 ("col-sm-4", !P.isSidebarShown)
               ),
                 iL.map{ case (c, i) =>
-                  LodoList(c.id.toString,
-                    LodoList.Props(P.b, P.itemMap, c, i, P.parentComplete || c.completed)
-                  )
+                  !(P.isCompleteHidden && c.completed) ?=
+                    LodoList(c.id.toString,
+                      LodoList.Props(P.b, P.itemMap, c, i, P.parentComplete || c.completed, P.isCompleteHidden)
+                    )
                 }
               )
             }),
