@@ -27,7 +27,8 @@ import Helper._
 import scala.scalajs.js
 
 object LodoList {
-  case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int)
+  case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int,
+                   parentComplete: Boolean)
 
   case class State(isAdding: Boolean = false,isEditing: Boolean = false,
                    addText: String = "", editText: String,
@@ -147,16 +148,18 @@ object LodoList {
                   ^.defaultValue := P.item.contents, ^.onChange ==> B.onEditChange)
               )
             else
-            <.span(^.cls := "content-data",
+            <.span(
+              ^.classSet1("content-data", ("item-complete", P.parentComplete || P.item.completed)),
               ^.dangerouslySetInnerHtml(P.b.mdTransform(P.item.contents))
             )
           ),
           BtnGroup(
             BtnGroup.Props(P.item, "item",
-              S.isEditing, S.isAdding,
+              S.isEditing, S.isAdding, P.item.completed,
               P.b.onClickComplete,
               B.onClickEdit,
-              B.onClickAdd
+              B.onClickAdd,
+              P.b.onClickRemove
             )
           )
         ),
@@ -164,7 +167,9 @@ object LodoList {
           (children.nonEmpty && !S.isFolded) ?= children
             .zipWithIndex
             .map { case (c, i) =>
-              LodoList(c.id.toString, LodoList.Props(P.b, P.itemMap, c, i))
+              LodoList(c.id.toString,
+                LodoList.Props(P.b, P.itemMap, c, i, P.parentComplete || c.completed)
+              )
             },
           S.isAdding ?= <.div(
             <.form(^.onSubmit ==> B.onAddSubmit,

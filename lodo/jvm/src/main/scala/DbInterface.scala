@@ -60,8 +60,13 @@ object DbInterface {
           where(s.id === op.item.id)
           set(s.contents := op.newContents)
         )
-      case op: CompleteOp =>
+      case op: RemoveOp =>
         items.deleteWhere(_.id === op.item.id)
+      case op: CompleteOp =>
+        update(items)(s =>
+          where(s.id === op.item.id)
+            set(s.completed := op.completed)
+        )
       case op: MoveOp =>
         update(items)(s =>
           where(s.id === op.item.id)
@@ -80,8 +85,13 @@ object DbInterface {
           where(s.id === op.item.id)
           set(s.contents := op.item.contents)
         )
-      case op: CompleteOp =>
+      case op: RemoveOp =>
         items.insert(op.item)
+      case op: CompleteOp =>
+        update(items)(s =>
+          where(s.id === op.item.id)
+            set(s.completed := !op.completed)
+        )
       case op: MoveOp =>
         update(items)(s =>
           where(s.id === op.item.id)

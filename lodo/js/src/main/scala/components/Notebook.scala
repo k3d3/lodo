@@ -127,14 +127,19 @@ object Notebook {
                   ^.defaultValue := P.item.contents, ^.onChange ==> B.onEdit)
               )
             else
-              <.span(^.cls := "content-data", P.item.contents)
+              <.span(
+                ^.classSet1("content-data", ("item-complete", P.item.completed)),
+                P.item.contents
+              )
           ),
           BtnGroup(
             BtnGroup.Props(P.item, "page",
               S.isEditing, if (P.selectedNotebook == Some(P.item.id)) P.isAdding else false,
+              P.item.completed,
               P.b.onClickComplete,
               B.onClickEdit,
-              B.onClickAdd
+              B.onClickAdd,
+              P.b.onClickRemove
             )
           )
         )

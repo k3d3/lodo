@@ -258,3 +258,7 @@ a [draggable=true] {
 .content-data h3, .content-data h4, .content-data h5, .content-data h6 {
     display: inline;
 }
+
+.item-complete {
+    text-decoration: line-through;
+}

@@ -20,7 +20,8 @@ package lodo
 import java.util.UUID
 
 // If parent is None, item is at root
-case class Item(id: UUID, parent: Option[UUID], timestamp: Long, contents: String) {
+case class Item(id: UUID, parent: Option[UUID], timestamp: Long, contents: String,
+                completed: Boolean = false, folded: Boolean = false) {
   def this() = this(new UUID(0, 0), None, 0, "")
 }
 
@@ -33,8 +34,10 @@ case class ItemMap(items: Map[UUID, Item] = Map()) {
       ItemMap(items + (item.id -> item))
     case EditOp(item, newContents) =>
       ItemMap(items + (item.id -> item.copy(contents = newContents)))
-    case CompleteOp(item, itemChildren) =>
+    case RemoveOp(item, itemChildren) =>
       ItemMap(items -- itemChildren.map(_.id) - item.id)
+    case CompleteOp(item, completed) =>
+      ItemMap(items + (item.id -> item.copy(completed = completed)))
     case MoveOp(item, newParent, newTimestamp) =>
       ItemMap(items + (item.id -> item.copy(parent = newParent, timestamp = newTimestamp)))
     case DuplicateOp(item, newId, newParent, newTimestamp) =>
@@ -46,8 +49,10 @@ case class ItemMap(items: Map[UUID, Item] = Map()) {
       ItemMap(items - item.id)
     case EditOp(item, _) =>
       ItemMap(items + (item.id -> item))
-    case CompleteOp(item, itemChildren) =>
+    case RemoveOp(item, itemChildren) =>
       ItemMap(items + (item.id -> item) ++ itemChildren.map(i => i.id -> i))
+    case CompleteOp(item, completed) =>
+      ItemMap(items + (item.id -> item.copy(completed = !completed)))
     case MoveOp(item, _, _) =>
       ItemMap(items + (item.id -> item))
     case DuplicateOp(_, newId, _, _) =>
@@ -94,7 +99,8 @@ case class ItemMap(items: Map[UUID, Item] = Map()) {
 sealed trait Op
 case class AddOp(item: Item) extends Op
 case class EditOp(item: Item, newContents: String) extends Op
-case class CompleteOp(item: Item, itemChildren: Seq[Item]) extends Op
+case class RemoveOp(item: Item, itemChildren: Seq[Item]) extends Op
+case class CompleteOp(item: Item, completed: Boolean) extends Op
 case class MoveOp(item: Item, newParent: Option[UUID], newTimestamp: Long) extends Op
 case class DuplicateOp(item: Item, newId: UUID, newParent: Option[UUID], newTimestamp: Long) extends Op
 

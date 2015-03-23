@@ -117,18 +117,26 @@ object Dashboard {
     }
 
     def onClickComplete(item: Item) = {
+      t.modState(s => {
+        var op = CompleteOp(item, !item.completed)
+        Client[LodoApi].applyOperation(op).call()
+        s.copy(itemMap = s.itemMap(op))
+      })
+    }
+
+    def onClickRemove(item: Item) = {
       if (item.parent == None)
         t.modState(s => {
-          val op = CompleteOp(item, s.itemMap.recursiveChildren(item.id))
+          val op = RemoveOp(item, s.itemMap.recursiveChildren(item.id))
           Client[LodoApi].applyOperation(op).call()
           val newItemMap = s.itemMap(op)
           s.copy(
             selectedNotebook = newItemMap.notebooks().headOption.map(_.id),
-            itemMap = newItemMap
+              itemMap = newItemMap
           )
         })
       else
-        applyOperation(itemMap => CompleteOp(item, itemMap.recursiveChildren(item.id)))
+        applyOperation(itemMap => RemoveOp(item, itemMap.recursiveChildren(item.id)))
     }
 
     def onNotebookClickAdd(item: Item) = {

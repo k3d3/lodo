@@ -78,11 +78,16 @@ object Contents {
           ("col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3", P.isSidebarShown),
           ("col-sm-12 col-md-12", !P.isSidebarShown)
         ),
-        P.selectedNotebook.map(n =>
+        P.itemMap(P.selectedNotebook).map(item =>
           P.itemMap
-            .children(n)
+            .children(item.id)
             .zipWithIndex
-            .map{ case (p, i) => Page(Page.Props(P.b, P.itemMap, p, i, P.isSidebarShown)) }
+            .map {
+              case (p, i) =>
+                Page(
+                  Page.Props(P.b, P.itemMap, p, i, P.isSidebarShown, item.completed)
+                )
+            }
         ),
         if (P.isAdding)
           <.div(
