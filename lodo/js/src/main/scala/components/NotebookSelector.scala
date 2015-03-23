@@ -94,8 +94,7 @@ object NotebookSelector {
         P.itemMap.notebooks()
           .zipWithIndex
           .map { case (c, i) =>
-            !(P.isCompleteHidden && c.completed) ?=
-              Notebook(Notebook.Props(P.b, P.selectedNotebook, P.isAdding, P.itemMap, c, i))
+            Notebook(Notebook.Props(P.b, P.selectedNotebook, P.isAdding, P.itemMap, c, i))
           },
         if (S.isNotebookAdding)
           <.li(
