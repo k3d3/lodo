@@ -262,3 +262,11 @@ a [draggable=true] {
 .item-complete {
     text-decoration: line-through;
 }
+
+.nav-selected {
+    background-color: #428BCA;
+}
+
+.nav-selected > a {
+    color: #FFF !important;
+}

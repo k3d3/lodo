@@ -27,7 +27,9 @@ import Helper._
 object NotebookSelector {
   case class Props(b: Dashboard.Backend, itemMap: ItemMap,
                    selectedNotebook: Option[UUID],
-                   isAdding: Boolean, isCompleteHidden: Boolean)
+                   isAdding: Boolean,
+                   isCompleteHidden: Boolean,
+                   isQuickAdd: Boolean)
 
   case class State(isNotebookAdding: Boolean = false,
                    addText: String = "",
@@ -48,7 +50,7 @@ object NotebookSelector {
       e.preventDefault()
       t.modState(s => {
         t.props.b.onNotebookAddComplete(AddOp(Item(UUID.randomUUID, None, time(), s.addText)))
-        s.copy(isNotebookAdding = false, addText = "")
+        s.copy(isNotebookAdding = t.props.isQuickAdd, addText = "")
       })
     }
 

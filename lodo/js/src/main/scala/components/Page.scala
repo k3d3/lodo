@@ -26,7 +26,8 @@ import Helper._
 object Page {
   case class Props(b: Dashboard.Backend, itemMap: ItemMap,
                    item: Item, index: Int, isSidebarShown: Boolean,
-                   parentComplete: Boolean, isCompleteHidden: Boolean)
+                   parentComplete: Boolean, isCompleteHidden: Boolean,
+                   isQuickAdd: Boolean)
 
   case class State(isAdding: Boolean = false, isEditing: Boolean = false,
                    addText: String = "", editText: String,
@@ -67,7 +68,7 @@ object Page {
         t.props.b.applyOperation(
           AddOp(Item(UUID.randomUUID, Some(t.props.item.id), time(), s.addText))
         )
-        s.copy(isAdding = false, addText = "")
+        s.copy(isAdding = t.props.isQuickAdd, addText = "")
       })
     }
 
@@ -176,7 +177,7 @@ object Page {
                 iL.map{ case (c, i) =>
                   !(P.isCompleteHidden && c.completed) ?=
                     LodoList(c.id.toString,
-                      LodoList.Props(P.b, P.itemMap, c, i, P.parentComplete || c.completed, P.isCompleteHidden)
+                      LodoList.Props(P.b, P.itemMap, c, i, P.parentComplete || c.completed, P.isCompleteHidden, P.isQuickAdd)
                     )
                 }
               )

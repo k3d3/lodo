@@ -4,7 +4,7 @@ import japgolly.scalajs.react.ReactComponentB
 import japgolly.scalajs.react.vdom.prefix_<^._
 
 object Header {
-  case class Props(b: Dashboard.Backend)
+  case class Props(b: Dashboard.Backend, isShowSidebar: Boolean, isHideComplete: Boolean, isQuickAdd: Boolean)
 
   val header = ReactComponentB[Props]("Header")
     .render(P => {
@@ -22,13 +22,23 @@ object Header {
             <.button(^.cls := "navbar-toggle collapsed", ^.tpe := "button",
               <.span(^.cls := "glyphicon glyphicon-search")
             ),
-            <.button(^.cls := "navbar-toggle collapsed", ^.tpe := "button",
+            <.button(
+              ^.classSet1("navbar-toggle collapsed", ("nav-selected", P.isShowSidebar)),
+              ^.tpe := "button",
               ^.onClick --> P.b.toggleShowSidebar(),
               <.span(^.cls := "glyphicon glyphicon-book")
             ),
-            <.button(^.cls := "navbar-toggle collapsed", ^.tpe := "button",
+            <.button(
+              ^.classSet1("navbar-toggle collapsed", ("nav-selected", !P.isHideComplete)),
+              ^.tpe := "button",
               ^.onClick --> P.b.toggleCompleted(),
               <.span(^.cls := "glyphicon glyphicon-ok-circle")
+            ),
+            <.button(
+              ^.classSet1("navbar-toggle collapsed", ("nav-selected", P.isQuickAdd)),
+              ^.tpe := "button",
+              ^.onClick --> P.b.toggleQuickAdd(),
+              <.span(^.cls := "glyphicon glyphicon-time")
             ),
             <.span(^.cls := "navbar-brand",
               <.span(^.cls := "glyphicon glyphicon-check"),
@@ -38,11 +48,20 @@ object Header {
           <.div(^.cls := "navbar-collapse collapse",
             <.p(^.cls := "navbar-text", "Toggle:"),
             <.ul(^.cls := "nav navbar-nav",
-              <.li(<.a(^.href := "#",
+              <.li(
+                ^.classSet(("nav-selected", !P.isShowSidebar)),
+                <.a(^.href := "#",
                 ^.onClick --> P.b.toggleShowSidebar(), "Notebooks")
               ),
-              <.li(<.a(^.href := "#",
+              <.li(
+                ^.classSet(("nav-selected", !P.isHideComplete)),
+                <.a(^.href := "#",
                 ^.onClick --> P.b.toggleCompleted(), "Completed")
+              ),
+              <.li(
+                ^.classSet(("nav-selected", P.isQuickAdd)),
+                <.a(^.href := "#",
+                ^.onClick --> P.b.toggleQuickAdd(), "Quick Add")
               )
             ),
             <.ul(^.cls := "nav navbar-nav navbar-right",

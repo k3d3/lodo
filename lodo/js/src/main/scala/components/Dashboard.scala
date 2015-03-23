@@ -21,6 +21,7 @@ object Dashboard {
                    isAdding: Boolean = false,
                    isSidebarShown: Boolean = false,
                    isCompleteHidden: Boolean = false,
+                   isQuickAdd: Boolean = false,
                    lastOp: Int = 0, sessId: UUID = new UUID(0, 0))
   // Note that isSidebarShown is actually inverted for non-mobile
 
@@ -48,8 +49,7 @@ object Dashboard {
       call.onSuccess({ case changeOption: Option[List[OpType]] =>
         changeOption match {
           case None =>
-            dom.location.reload() // TODO: For development only
-            //onInit()
+            dom.location.reload()
           case Some(changes) =>
             if (changes.nonEmpty)
               t.modState(s => {
@@ -107,6 +107,10 @@ object Dashboard {
       t.modState(s => s.copy(isCompleteHidden = !s.isCompleteHidden))
     }
 
+    def toggleQuickAdd() = {
+      t.modState(s => s.copy(isQuickAdd= !s.isQuickAdd))
+    }
+
     def performUndo()(e: ReactEvent): Future[Boolean] = Future {
       e.preventDefault()
       e.stopPropagation()
@@ -161,7 +165,7 @@ object Dashboard {
     def onAddComplete(op: AddOp) = {
       Client[LodoApi].applyOperation(op).call()
       t.modState(s => s.copy(
-        isAdding = false,
+        isAdding = s.isQuickAdd,
         itemMap = s.itemMap(op)
       ))
     }
@@ -200,9 +204,9 @@ object Dashboard {
     .render((router, S, B) => {
       val appLinks = MainRouter.appLinks(router)
       <.div(
-        Header(Header.Props(B)),
-        Sidebar(Sidebar.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, S.isSidebarShown, S.isCompleteHidden)),
-        Contents(Contents.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, !S.isSidebarShown, S.isCompleteHidden))
+        Header(Header.Props(B, S.isSidebarShown, S.isCompleteHidden, S.isQuickAdd)),
+        Sidebar(Sidebar.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, S.isSidebarShown, S.isCompleteHidden, S.isQuickAdd)),
+        Contents(Contents.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, !S.isSidebarShown, S.isCompleteHidden, S.isQuickAdd))
       )
     }).build
 }

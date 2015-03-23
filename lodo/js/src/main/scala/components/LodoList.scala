@@ -28,7 +28,8 @@ import scala.scalajs.js
 
 object LodoList {
   case class Props(b: Dashboard.Backend, itemMap: ItemMap, item: Item, index: Int,
-                   parentComplete: Boolean, isCompleteHidden: Boolean)
+                   parentComplete: Boolean, isCompleteHidden: Boolean,
+                   isQuickAdd: Boolean)
 
   case class State(isAdding: Boolean = false,isEditing: Boolean = false,
                    addText: String = "", editText: String,
@@ -67,7 +68,7 @@ object LodoList {
       e.preventDefault()
       t.modState(s => {
         t.props.b.applyOperation(AddOp(Item(UUID.randomUUID, Some(t.props.item.id), time(), s.addText)))
-        s.copy(addText = "")
+        s.copy(isAdding = t.props.isQuickAdd, addText = "")
       })
     }
 
@@ -169,7 +170,7 @@ object LodoList {
             .map { case (c, i) =>
               !(P.isCompleteHidden && c.completed) ?=
                 LodoList(c.id.toString,
-                  LodoList.Props(P.b, P.itemMap, c, i, P.parentComplete || c.completed, P.isCompleteHidden)
+                  LodoList.Props(P.b, P.itemMap, c, i, P.parentComplete || c.completed, P.isCompleteHidden, P.isQuickAdd)
                 )
             },
           S.isAdding ?= <.div(

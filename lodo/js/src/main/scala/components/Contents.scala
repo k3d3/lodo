@@ -8,7 +8,8 @@ import lodo.Helper._
 
 object Contents {
   case class Props(b: Dashboard.Backend, itemMap: ItemMap, selectedNotebook: Option[UUID],
-                   isAdding: Boolean, isSidebarShown: Boolean, isCompleteHidden: Boolean)
+                   isAdding: Boolean, isSidebarShown: Boolean, isCompleteHidden: Boolean,
+                   isQuickAdd: Boolean)
 
   case class State(addText: String = "", isDragOver: Boolean = false)
 
@@ -85,7 +86,7 @@ object Contents {
             .map {
               case (p, i) =>
                 !(P.isCompleteHidden && (item.completed || p.completed)) ?=
-                  Page(Page.Props(P.b, P.itemMap, p, i, P.isSidebarShown, item.completed, P.isCompleteHidden))
+                  Page(Page.Props(P.b, P.itemMap, p, i, P.isSidebarShown, item.completed, P.isCompleteHidden, P.isQuickAdd))
             }
         ),
         if (P.isAdding)
