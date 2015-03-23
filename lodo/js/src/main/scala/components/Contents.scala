@@ -84,7 +84,7 @@ object Contents {
             .zipWithIndex
             .map {
               case (p, i) =>
-                !(P.isCompleteHidden && p.completed) ?=
+                !(P.isCompleteHidden && (item.completed || p.completed)) ?=
                   Page(Page.Props(P.b, P.itemMap, p, i, P.isSidebarShown, item.completed, P.isCompleteHidden))
             }
         ),
