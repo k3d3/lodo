@@ -112,7 +112,7 @@ object Page {
       e.stopPropagation()
       e.preventDefault()
 
-      t.modState(s => s.copy(isFolded = !s.isFolded))
+      t.props.b.onClickFold(t.props.item)
     }
   }
 
@@ -142,7 +142,7 @@ object Page {
           ^.draggable := !S.isEditing,
           ^.onDragStart ==> B.onDragStart,
           ^.onDragEnd ==> B.onDragEnd,
-          SelNum(SelNum.Props(P.index, S.isFolded, B.toggleFold)),
+          SelNum(SelNum.Props(P.index, P.item.folded, B.toggleFold)),
           <.span(^.cls := "content",
             if (S.isEditing)
               <.form(^.onSubmit ==> B.onEditSubmit(P.item),
@@ -166,7 +166,7 @@ object Page {
           )
         ),
         (children.nonEmpty || S.isAdding) ?= <.div(^.cls := "panel-body",
-          (children.nonEmpty && !S.isFolded) ?=
+          (children.nonEmpty && !P.item.folded) ?=
             columnize(children.zipWithIndex, if (P.isSidebarShown) 2 else 3)
             .map(iL => {
               <.div(^.classSet(

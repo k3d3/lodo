@@ -124,6 +124,14 @@ object Dashboard {
       })
     }
 
+    def onClickFold(item: Item) = {
+      t.modState(s => {
+        var op = FoldOp(item, !item.folded)
+        Client[LodoApi].applyOperation(op).call()
+        s.copy(itemMap = s.itemMap(op))
+      })
+    }
+
     def onClickRemove(item: Item) = {
       if (item.parent == None)
         t.modState(s => {

@@ -67,6 +67,11 @@ object DbInterface {
           where(s.id === op.item.id)
             set(s.completed := op.completed)
         )
+      case op: FoldOp =>
+        update(items)(s =>
+          where(s.id === op.item.id)
+            set(s.folded := op.folded)
+        )
       case op: MoveOp =>
         update(items)(s =>
           where(s.id === op.item.id)
@@ -91,6 +96,11 @@ object DbInterface {
         update(items)(s =>
           where(s.id === op.item.id)
             set(s.completed := !op.completed)
+        )
+      case op: FoldOp =>
+        update(items)(s =>
+          where(s.id === op.item.id)
+            set(s.folded := !op.folded)
         )
       case op: MoveOp =>
         update(items)(s =>

@@ -38,6 +38,8 @@ case class ItemMap(items: Map[UUID, Item] = Map()) {
       ItemMap(items -- itemChildren.map(_.id) - item.id)
     case CompleteOp(item, completed) =>
       ItemMap(items + (item.id -> item.copy(completed = completed)))
+    case FoldOp(item, folded) =>
+      ItemMap(items + (item.id -> item.copy(folded = folded)))
     case MoveOp(item, newParent, newTimestamp) =>
       ItemMap(items + (item.id -> item.copy(parent = newParent, timestamp = newTimestamp)))
     case DuplicateOp(item, newId, newParent, newTimestamp) =>
@@ -53,6 +55,8 @@ case class ItemMap(items: Map[UUID, Item] = Map()) {
       ItemMap(items + (item.id -> item) ++ itemChildren.map(i => i.id -> i))
     case CompleteOp(item, completed) =>
       ItemMap(items + (item.id -> item.copy(completed = !completed)))
+    case FoldOp(item, folded) =>
+      ItemMap(items + (item.id -> item.copy(folded = !folded)))
     case MoveOp(item, _, _) =>
       ItemMap(items + (item.id -> item))
     case DuplicateOp(_, newId, _, _) =>
@@ -101,6 +105,7 @@ case class AddOp(item: Item) extends Op
 case class EditOp(item: Item, newContents: String) extends Op
 case class RemoveOp(item: Item, itemChildren: Seq[Item]) extends Op
 case class CompleteOp(item: Item, completed: Boolean) extends Op
+case class FoldOp(item: Item, folded: Boolean) extends Op
 case class MoveOp(item: Item, newParent: Option[UUID], newTimestamp: Long) extends Op
 case class DuplicateOp(item: Item, newId: UUID, newParent: Option[UUID], newTimestamp: Long) extends Op
 

@@ -112,7 +112,7 @@ object LodoList {
       e.stopPropagation()
       e.preventDefault()
 
-      t.modState(s => s.copy(isFolded = !s.isFolded))
+      t.props.b.onClickFold(t.props.item)
     }
   }
 
@@ -140,7 +140,7 @@ object LodoList {
           ^.onDrop ==> B.onDrop,
           ^.onDragStart ==> B.onDragStart,
           ^.onDragEnd ==> B.onDragEnd,
-          SelNum(SelNum.Props(P.index, S.isFolded, B.toggleFold)),
+          SelNum(SelNum.Props(P.index, P.item.folded, B.toggleFold)),
           <.span(^.cls := "content",
             if (S.isEditing)
               <.form(^.onSubmit ==> B.onEditSubmit(P.item),
@@ -164,7 +164,7 @@ object LodoList {
           )
         ),
         (children.nonEmpty || S.isAdding) ?= <.div(^.cls := "panel-body",
-          (children.nonEmpty && !S.isFolded) ?= children
+          (children.nonEmpty && !P.item.folded) ?= children
             .zipWithIndex
             .map { case (c, i) =>
               LodoList(c.id.toString,
