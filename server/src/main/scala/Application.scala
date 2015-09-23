@@ -15,25 +15,40 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package lodo
+package controllers
+
+import java.nio.ByteBuffer
 
 import akka.actor.ActorSystem
-import com.typesafe.config.ConfigFactory
-import spray.httpx.encoding.Gzip
-import spray.routing.SimpleRoutingApp
-import upickle._
+import boopickle.Default._
+import play.api.mvc._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Properties}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-import Helper._
-
-object Router extends autowire.Server[String, upickle.Reader, upickle.Writer] {
-  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
-  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
+object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
+  def read[R: Pickler](p: ByteBuffer) = Unpickle[R].fromBytes(p)
+  def write[R: Pickler](r: R) = Pickle.intoBytes(r)
 }
 
-object Server extends SimpleRoutingApp {
+object Application extends Controller {
+  //val apiService = new ApiService()
+  
+  def index = Action {
+    Ok(views.html.index("Lodo"))
+  }
+
+  def logging = Action(parse.anyContent) {
+    implicit request =>
+      request.body.asJson.foreach { msg =>
+        println(s"CLIENT - $msg")
+      }
+      Ok("")
+  }
+}
+
+/*object Server extends SimpleRoutingApp {
   def main(args: Array[String]): Unit = {
 
 
@@ -75,4 +90,4 @@ object Server extends SimpleRoutingApp {
       }
     }
   }
-}
+}*/

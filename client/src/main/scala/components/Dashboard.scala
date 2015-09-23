@@ -9,6 +9,7 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 import org.scalajs.dom
 
 import autowire._
+import boopickle.Default._
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 

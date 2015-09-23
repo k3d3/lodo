@@ -17,7 +17,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package lodo
 
-import org.squeryl.{Schema, SessionFactory, Session}
+object DbInterface {
+  var items: Seq[Item] = Seq[Item]()
+
+  def getItems(): ItemMap =
+    new ItemMap(items)
+
+  def apply(op: Op) = ???
+
+  def undo(op: Op) = ???
+}
+
+/*import org.squeryl.{Schema, SessionFactory, Session}
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.adapters.H2Adapter
 
@@ -120,4 +131,4 @@ object Tables extends Schema {
     s.parent is indexed,
     s.timestamp is indexed
   ))
-}
+}*/

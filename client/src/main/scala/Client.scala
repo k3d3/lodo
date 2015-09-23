@@ -17,20 +17,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package lodo
 
+import java.nio.ByteBuffer
+
+import boopickle.Default._
 import org.scalajs.dom
-import upickle._
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+import scala.scalajs.js.typedarray._
 
-object Client extends autowire.Client[String, upickle.Reader, upickle.Writer] {
-  override def doCall(req: Request): Future[String] = {
+object Client extends autowire.Client[ByteBuffer, Pickler, Pickler] {
+  override def doCall(req: Request): Future[ByteBuffer] = {
     dom.ext.Ajax.post(
       url = "/api/" + req.path.mkString("/"),
-      data = upickle.write(req.args)
-    ).map(_.responseText)
+      data = Pickle.intoBytes(req.args),
+      responseType = "arraybuffer",
+      headers = Map("Content-Type" -> "application/octet-stream")
+    ).map(r => TypedArrayBuffer.wrap(r.response.asInstanceOf[ArrayBuffer]))
   }
 
-  def read[Result: upickle.Reader](p: String) = upickle.read[Result](p)
-  def write[Result: upickle.Writer](r: Result) = upickle.write(r)
+  def read[Result: Pickler](p: ByteBuffer) = Unpickle[Result].fromBytes(p)
+  def write[Result: Pickler](r: Result) = Pickle.intoBytes(r)
 }

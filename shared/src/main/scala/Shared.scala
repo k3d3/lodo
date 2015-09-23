@@ -17,7 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package lodo
 
-import upickle._
 import java.util.UUID
 
 // All lists are considered "Items". The Notebooks are items, the pages within the notebooks are items,
@@ -25,13 +24,6 @@ import java.util.UUID
 // you could convert a deep list into a notebook by dragging it to the sidebar.
 
 object Helper {
-  implicit val uuid2Writer = upickle.Writer[UUID] {
-    case t: UUID => Js.Str(t.toString)
-  }
-  implicit val uuid2Reader = upickle.Reader[UUID] {
-    case Js.Str(s) => UUID.fromString(s)
-  }
-
   def time(): Long = System.currentTimeMillis()
 }
 

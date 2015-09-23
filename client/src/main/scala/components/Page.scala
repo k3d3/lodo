@@ -38,7 +38,7 @@ object Page {
     def onClickEdit(item: Item) =
       t.modState(s => {
         if (s.isEditing)
-          t._props.b.applyOperation(EditOp(item, s.editText))
+          t.props.b.applyOperation(EditOp(item, s.editText))
         s.copy(isEditing = !s.isEditing)
       })
 
@@ -57,7 +57,7 @@ object Page {
     def onEditSubmit(item: Item)(e: ReactEvent) = {
       e.preventDefault()
       t.modState(s => {
-        t._props.b.applyOperation(EditOp(item, s.editText))
+        t.props.b.applyOperation(EditOp(item, s.editText))
         s.copy(isEditing = false)
       })
     }
