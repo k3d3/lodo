@@ -1,0 +1,272 @@
+/* Bootstrap and environment modifications */
+body {
+    padding-top: 50px;
+}
+.navbar-fixed-top {
+    border: 0;
+}
+.panel {
+    /*border: 1px solid #000;*/
+    border-radius: 0px;
+    box-shadow: none;
+    margin-right: -1px;
+}
+.panel > .panel-heading {
+    color: #333;
+}
+
+.panel > .panel-heading:hover {
+    color: #000;
+}
+
+.panel-heading {
+    padding: 2px 0px 2px 5px;
+    margin-right: 0px;
+}
+.panel-body {
+    padding: 2px 0px 2px 5px;
+    margin-right: 0px;
+}
+
+.panel.item > .panel-body {
+    margin-left: 0px;
+}
+
+.panel.item-list > .panel-body {
+    margin-left: 11px;
+    padding-left: 0px;
+    border-left: 1px solid #999;
+}
+
+.panel.item-list > .panel-body:hover {
+    border-left: 1px solid #000;
+}
+
+.panel-body:not(:hover) > .btn-group {
+    display: none;
+}
+.panel-heading:not(:hover) > .btn-group {
+    display: none;
+}
+a:not(:hover) > .btn-group {
+    display: none;
+}
+
+.panel-title {
+    font-size: 12px;
+}
+.panel.item, .panel.item-list {
+    margin-bottom: -1px;
+}
+
+.panel.page {
+    margin-bottom: 20px;
+}
+
+.navbar-header > button {
+    padding: 9px 13px;
+}
+.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1,
+.col-xs-2, .col-sm-2, .col-md-2, .col-lg-2,
+.col-xs-3, .col-sm-3, .col-md-3, .col-lg-3,
+.col-xs-4, .col-sm-4, .col-md-4, .col-lg-4,
+.col-xs-5, .col-sm-5, .col-md-5, .col-lg-5,
+.col-xs-6, .col-sm-6, .col-md-6, .col-lg-6,
+.col-xs-7, .col-sm-7, .col-md-7, .col-lg-7,
+.col-xs-8, .col-sm-8, .col-md-8, .col-lg-8,
+.col-xs-9, .col-sm-9, .col-md-9, .col-lg-9,
+.col-xs-10, .col-sm-10, .col-md-10, .col-lg-10,
+.col-xs-11, .col-sm-11, .col-md-11, .col-lg-11,
+.col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+/* Bootstrap-designed style additions */
+/* TODO for mobile */
+.sidebar {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .sidebar:not(.sidebar-shown) {
+        position: fixed;
+        top: 50px;
+        bottom: 0;
+        left: 0;
+        z-index: 1000;
+        display: block;
+        padding: 20px;
+        overflow-x: hidden;
+        overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+        background-color: #f8f8f8;
+        border-right: 1px solid #eee;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar.sidebar-shown {
+        display: block;
+        overflow-x: hidden;
+        background-color: #f8f8f8;
+    }
+}
+
+.nav-sidebar {
+    margin-right: -21px; /* 20px padding + 1px border */
+    margin-bottom: 20px;
+    margin-left: -20px;
+}
+.nav-sidebar > li > a {
+    padding-right: 20px;
+    padding-left: 20px;
+}
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+    color: #fff;
+    background-color: #428bca;
+}
+
+.main {
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+    .main {
+        border-top: 1px solid #eee;
+    }
+}
+
+/* Lodo styles */
+.sel-num {
+    color: #000;
+    background-color: #fff;
+    border: 1px solid #000;
+    border-radius: 2px;
+    float: left;
+    margin-right: 5px;
+    margin-top: 2px;
+    text-align: center;
+    width: 15px;
+    height: 15px;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.foldstatus {
+    display: none;
+}
+
+.panel-heading:hover > .sel-num > .foldstatus {
+    display: block;
+}
+.panel-heading:hover > .sel-num > .notfoldstatus {
+    display: none;
+}
+
+.panel-body:hover > .sel-num > .foldstatus {
+    display: block;
+}
+.panel-body:hover > .sel-num > .notfoldstatus {
+    display: none;
+}
+
+.page-buttons {
+    margin-top: -2px;
+    margin-right: 2px;
+}
+
+.page-buttons > .btn-sm {
+    padding: 2px 5px;
+}
+
+.item-buttons > .btn-sm {
+    padding: 2px 5px;
+    font-size: 9px;
+}
+
+.content {
+    word-wrap: break-word;
+}
+
+.content > form > input {
+    color: #000;
+}
+
+.content form {
+    margin: 0px;
+    padding: 0px;
+    width: 0px;
+    display: inline;
+}
+
+.selected {
+    box-shadow: 0px 0px 4px #4195fc;
+    background-color: #e0eefe;
+}
+.selected > .panel-header > .sel-num {
+    background-color: #ddd;
+}
+
+.filter::-webkit-input-placeholder {
+    font-family: "Glyphicons Halflings";
+    content: "\e003";
+}
+.filter:-ms-input-placeholder {
+    font-family: "Glyphicons Halflings";
+    content: "\e003";
+}
+.filter:-moz-placeholder {
+    font-family: "Glyphicons Halflings";
+    content: "\e003";
+}
+.filter::-moz-placeholder {
+    font-family: "Glyphicons Halflings";
+    content: "\e003";
+}
+
+[draggable=true] {
+    -moz-user-drag: element;
+    -webkit-user-drag: element;
+    cursor: move;
+}
+
+a [draggable=true] {
+    cursor: move;
+}
+
+.dragging {
+    opacity: 0.5;
+}
+
+.dragover {
+    border: 2px dashed #000;
+}
+
+.draghidden {
+    /* instead of display: none so we take up the same space */
+    visibility: hidden;
+}
+
+#lodo-contents {
+    padding-bottom: 100px;
+}
+
+/* Markdown stuff */
+.content-data p, .content-data h1, .content-data h2,
+.content-data h3, .content-data h4, .content-data h5, .content-data h6 {
+    display: inline;
+}
+
+.item-complete {
+    text-decoration: line-through;
+}
+
+.nav-selected {
+    background-color: #428BCA;
+}
+
+.nav-selected > a {
+    color: #FFF !important;
+}

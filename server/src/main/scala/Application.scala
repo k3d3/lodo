@@ -36,7 +36,11 @@ object Application extends Controller {
   //val apiService = new ApiService()
   
   def index = Action {
-    Ok(views.html.index("Lodo"))
+    Ok("This is the index")
+  }
+
+  def lodo = Action {
+    Ok(views.html.lodo())
   }
 
   def logging = Action(parse.anyContent) {
