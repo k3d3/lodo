@@ -21,7 +21,9 @@ import java.nio.ByteBuffer
 
 import akka.actor.ActorSystem
 import boopickle.Default._
+import lodo.{LodoApi, ApiService}
 import play.api.mvc._
+import play.libs.Akka
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Properties}
@@ -33,7 +35,7 @@ object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
 }
 
 object Application extends Controller {
-  //val apiService = new ApiService()
+  val apiService = new ApiService(Akka.system)
   
   def index = Action {
     Ok("This is the index")
@@ -41,6 +43,21 @@ object Application extends Controller {
 
   def lodo = Action {
     Ok(views.html.lodo())
+  }
+
+  def autowireApi(path: String) = Action.async(parse.raw) {
+    implicit request =>
+      println(s"Request path: $path")
+
+      val b = request.body.asBytes(parse.UNLIMITED).get
+
+      Router.route[LodoApi](apiService) {
+        autowire.Core.Request(path.split("/"), Unpickle[Map[String, ByteBuffer]].fromBytes(ByteBuffer.wrap(b)))
+      }.map(buffer => {
+        val data = Array.ofDim[Byte](buffer.remaining())
+        buffer.get(data)
+        Ok(data)
+      })
   }
 
   def logging = Action(parse.anyContent) {
