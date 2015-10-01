@@ -17,26 +17,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package lodo
 
-import japgolly.scalajs.react.React
-import japgolly.scalajs.react.extra.router.BaseUrl
-import org.scalajs.dom
+import scala.scalajs.js
+import scala.scalajs.js.typedarray
+import scala.scalajs.js.annotation.JSName
 
-import scala.scalajs.js.JSApp
-import scala.scalajs.js.annotation.JSExport
 
-@JSExport("Main")
-object Main extends JSApp {
-  @JSExport
-  def main(): Unit = {
-    val baseUrl = BaseUrl(dom.window.location.href.takeWhile(_ != '#'))
-    val router = MainRouter.router(baseUrl)
+@JSName("sodium")
+@js.native
+object LibSodium extends js.Object {
+  @JSName("crypto_box_keypair")
+  def cryptoBoxKeypair(): BoxKeypair = js.native
+}
 
-    React.render(router(), dom.document.body)
-
-    val test = LibSodium.cryptoBoxKeypair()
-    println(test)
-    println(test.keyType)
-    println(test.publicKey(0))
-    dom.console.log(test)
-  }
+@js.native
+trait BoxKeypair extends js.Object {
+  val publicKey: typedarray.Uint8Array = js.native
+  val privateKey: typedarray.Uint8Array = js.native
+  val keyType: String = js.native
 }

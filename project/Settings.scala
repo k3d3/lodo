@@ -59,6 +59,10 @@ object Settings {
     "com.vmunier" %% "play-scalajs-scripts" % versions.playScripts,
     "org.webjars" % "bootstrap" % versions.bootstrap % Provided,
     "com.typesafe.akka" %% "akka-actor" % "2.3.6",
+    "com.typesafe.slick" %% "slick" % "3.0.3",
+    "joda-time" % "joda-time" % "2.7",
+    "org.joda" % "joda-convert" % "1.7",
+    "com.github.tototoshi" %% "slick-joda-mapper" % "2.0.0",
     "com.h2database" % "h2" % "1.2.127"
   ))
 

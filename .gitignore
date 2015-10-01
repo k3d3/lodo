@@ -1,5 +1,8 @@
 *target/
 *.idea/
+
+server/logs/
+
 shared-sources.iml
 scala-sources.iml
 lodo.h2.db

@@ -17,6 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package lodo
 
+import java.util.UUID
+import java.sql.Blob
+import slick.driver.H2Driver.api._
+
 object DbInterface {
   var items: Seq[Item] = Seq[Item]()
 
@@ -26,6 +30,50 @@ object DbInterface {
   def apply(op: Op) = ???
 
   def undo(op: Op) = ???
+}
+
+/* We need a user that can own multiple notebooks
+ * Each notebook can have zero or more items
+ * Users can also share their owned notebooks with others
+ * This ability to share will probably need pubkey crypto
+ *
+ * */
+
+object DbTables {
+  case class DbUser(id: UUID, email: String)
+
+  class DbUsers(tag: Tag) extends Table[DbUser](tag, "Users") {
+    def id = column[UUID]("id", O.PrimaryKey)
+    def email = column[String]("email")
+    def * = (id, email) <> (DbUser.tupled, DbUser.unapply)
+  }
+
+  val dbUsers = TableQuery[DbUsers]
+
+  case class DbNotebook(id: UUID, ownerId: UUID)
+
+  class DbNotebooks(tag: Tag) extends Table[DbNotebook](tag, "Notebooks") {
+    def id = column[UUID]("id", O.PrimaryKey)
+    def ownerId = column[UUID]("owner_id")
+    def owner = foreignKey("owner_fk", ownerId, dbUsers)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
+    def * = (id, ownerId) <> (DbNotebook.tupled, DbNotebook.unapply)
+  }
+
+  val dbNotebooks = TableQuery[DbNotebooks]
+
+  case class DbItem(id: UUID, notebookId: UUID, revision: Int, data: Blob)
+
+  class DbItems(tag: Tag) extends Table[DbItem](tag, "Items") {
+    def id = column[UUID]("id", O.PrimaryKey)
+    def notebookId = column[UUID]("notebook_id")
+    def revision = column[Int]("revision")
+    def data = column[Blob]("data")
+
+    def notebook = foreignKey("notebook_fk", notebookId, dbNotebooks)(_.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Cascade)
+    def * = (id, notebookId, revision, data) <> (DbItem.tupled, DbItem.unapply)
+  }
+
+  val dbItems = TableQuery[DbItems]
 }
 
 /*import org.squeryl.{Schema, SessionFactory, Session}
