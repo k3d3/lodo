@@ -22,7 +22,9 @@ import japgolly.scalajs.react.extra.router.BaseUrl
 import org.scalajs.dom
 
 import scala.scalajs.js.JSApp
+import scala.scalajs.js.typedarray._
 import scala.scalajs.js.annotation.JSExport
+
 
 @JSExport("Main")
 object Main extends JSApp {
@@ -33,10 +35,18 @@ object Main extends JSApp {
 
     React.render(router(), dom.document.body)
 
-    val test = LibSodium.cryptoBoxKeypair()
-    println(test)
-    println(test.keyType)
-    println(test.publicKey(0))
-    dom.console.log(test)
+    val receiver = LibSodium.cryptoBoxKeypair()
+
+    val testString = Utf8Codec.encode("hello")
+
+    val cipherText = LibSodium.cryptoBoxSeal(testString, receiver.publicKey)
+
+    dom.console.log(cipherText)
+
+    val plainText = LibSodium.cryptoBoxSealOpen(cipherText, receiver.publicKey, receiver.privateKey)
+    
+    dom.console.log(Utf8Codec.decode(plainText))
+
+    
   }
 }
