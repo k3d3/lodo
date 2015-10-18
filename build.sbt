@@ -1,9 +1,12 @@
 import sbt.Keys._
 import sbt.Project.projectToRef
+import com.typesafe.sbteclipse.core.EclipsePlugin.EclipseKeys
+
 
 // a special crossProject for configuring a JS/JVM/shared structure
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
   .settings(
+    EclipseKeys.skipParents in ThisBuild := false,
     scalaVersion := Settings.versions.scala,
     libraryDependencies ++= Settings.sharedDependencies.value
   )

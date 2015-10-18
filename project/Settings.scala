@@ -63,7 +63,9 @@ object Settings {
     "joda-time" % "joda-time" % "2.7",
     "org.joda" % "joda-convert" % "1.7",
     "com.github.tototoshi" %% "slick-joda-mapper" % "2.0.0",
-    "com.h2database" % "h2" % "1.2.127"
+    "com.h2database" % "h2" % "1.2.127",
+    "org.webjars" % "font-awesome" % "4.3.0-1" % Provided,
+    "org.webjars" % "bootstrap" % versions.bootstrap % Provided
   ))
 
   /** Dependencies only used by the JS project (note the use of %%% instead of %%) */

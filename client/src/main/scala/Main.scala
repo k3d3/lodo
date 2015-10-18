@@ -18,26 +18,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package lodo
 
 import japgolly.scalajs.react.React
-import japgolly.scalajs.react.extra.router.BaseUrl
+import japgolly.scalajs.react.extra.router2._
+import japgolly.scalajs.react.vdom.prefix_<^._
 import org.scalajs.dom
 
-import scala.scalajs.js.JSApp
+import scala.scalajs.js
 import scala.scalajs.js.typedarray._
 import scala.scalajs.js.annotation.JSExport
 
 
 @JSExport("Main")
-object Main extends JSApp {
+object Main extends js.JSApp {
+  sealed trait Loc
+  case object DashboardLoc extends Loc
+
+  val routerConfig = RouterConfigDsl[Loc].buildConfig { dsl =>
+    import dsl._
+    (staticRoute(root, DashboardLoc) ~> renderR(ctl => Dashboard.dashboard(ctl)))
+      .notFound(redirectToPage(DashboardLoc)(Redirect.Replace))
+  }
+
   @JSExport
   def main(): Unit = {
-    val baseUrl = BaseUrl(dom.window.location.href.takeWhile(_ != '#'))
-    val router = MainRouter.router(baseUrl)
 
-    React.render(router(), dom.document.body)
+    val router = Router(BaseUrl(dom.window.location.href.takeWhile(_ != '#')), routerConfig)
 
-    val receiver = LibSodium.cryptoBoxKeypair()
+    React.render(router(), dom.document.getElementById("root"))
 
-    val testString = Utf8Codec.encode("hello")
+    /*val receiver = LibSodium.cryptoBoxKeypair()
+
+    val testString = LibSodium.Utf8Codec.encode("hello")
 
     val cipherText = LibSodium.cryptoBoxSeal(testString, receiver.publicKey)
 
@@ -45,8 +55,6 @@ object Main extends JSApp {
 
     val plainText = LibSodium.cryptoBoxSealOpen(cipherText, receiver.publicKey, receiver.privateKey)
     
-    dom.console.log(Utf8Codec.decode(plainText))
-
-    
+    dom.console.log(LibSodium.Utf8Codec.decode(plainText))*/
   }
 }

@@ -1,9 +1,6 @@
 package lodo
 
-import japgolly.scalajs.react.extra.router._
-import japgolly.scalajs.react.vdom.prefix_<^._
-
-trait AppLinks {
+/*trait AppLinks {
   def dashboard(content: TagMod*): ReactTag
 }
 
@@ -18,4 +15,4 @@ object MainRouter extends RoutingRules {
 
   // For now, do nothing with the intercept
   override protected def interceptRender(ic: InterceptionR) = ic.element
-}
+}*/

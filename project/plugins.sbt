@@ -10,3 +10,5 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.0.0")
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.2")
 
 addSbtPlugin("com.vmunier" % "sbt-play-scalajs" % "0.2.8")
+
+addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "3.0.0")

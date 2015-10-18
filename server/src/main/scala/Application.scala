@@ -37,18 +37,12 @@ object Router extends autowire.Server[ByteBuffer, Pickler, Pickler] {
 object Application extends Controller {
   val apiService = new ApiService(Akka.system)
   
-  def index = Action {
-    Ok("This is the index")
-  }
-
   def lodo = Action {
     Ok(views.html.lodo())
   }
 
   def autowireApi(path: String) = Action.async(parse.raw) {
     implicit request =>
-      println(s"Request path: $path")
-
       val b = request.body.asBytes(parse.UNLIMITED).get
 
       Router.route[LodoApi](apiService) {
