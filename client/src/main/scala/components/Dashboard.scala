@@ -14,7 +14,7 @@ import boopickle.Default._
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
 
-import lodo.Main.{DashboardLoc, Loc}
+import lodo.Main.{MainLoc, Loc}
 
 import Helper._
 
@@ -29,7 +29,7 @@ object Dashboard {
                    lastOp: Int = 0, sessId: UUID = new UUID(0, 0))
   // Note that isSidebarShown is actually inverted for non-mobile
 
-  class Backend(t: BackendScope[RouterCtl[Loc], State]) extends OnUnmount {
+  class Backend(t: BackendScope[Unit, State]) extends OnUnmount {
     def onInit(): Unit = {
       Client[LodoApi].getItems("mainUser").call().foreach { case (items: Seq[Item], lastOp: Int, sessId: UUID) =>
         val itemMap = new ItemMap(items)
@@ -202,7 +202,7 @@ object Dashboard {
     }
   }
 
-  val dashboard = ReactComponentB[RouterCtl[Loc]]("Dashboard")
+  val dashboard = ReactComponentB[Unit]("Dashboard")
     .initialState(State())
     .backend(new Backend(_))
     .render((router, S, B) => {
@@ -212,4 +212,6 @@ object Dashboard {
         Contents(Contents.Props(B, S.itemMap, S.selectedNotebook, S.isAdding, !S.isSidebarShown, S.isCompleteHidden, S.isQuickAdd))
       )
     }).build
+
+  def apply() = dashboard(())
 }

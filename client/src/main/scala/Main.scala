@@ -30,12 +30,12 @@ import scala.scalajs.js.annotation.JSExport
 @JSExport("Main")
 object Main extends js.JSApp {
   sealed trait Loc
-  case object DashboardLoc extends Loc
+  case object MainLoc extends Loc
 
   val routerConfig = RouterConfigDsl[Loc].buildConfig { dsl =>
     import dsl._
-    (staticRoute(root, DashboardLoc) ~> renderR(ctl => Dashboard.dashboard(ctl)))
-      .notFound(redirectToPage(DashboardLoc)(Redirect.Replace))
+    (staticRoute(root, MainLoc) ~> renderR(ctl => LoginManager.component(ctl)))
+      .notFound(redirectToPage(MainLoc)(Redirect.Replace))
   }
 
   @JSExport
